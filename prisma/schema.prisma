@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Account {
+  id          String        @id @default(uuid())
+  name        String
+  userId      String
+  Transaction Transaction[]
+}
+
+model Category {
+  id          String        @id @default(uuid())
+  name        String
+  userId      String
+  Transaction Transaction[]
+}
+
+model Client {
+  id     String @id @default(uuid())
+  name   String
+  userId String
+}
+
+model Transaction {
+  id         String  @id @default(uuid())
+  name       String
+  notes      String?
+  payee      String
+  categoryId String?
+  accountId  String
+  projectId  String?
+
+  category Category? @relation(fields: [categoryId], references: [id])
+  account  Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  project  Project?  @relation(fields: [projectId], references: [id])
+}
+
+model Project {
+  id          String        @id @default(uuid())
+  name        String
+  releaseDate DateTime?
+  notes       String?
+  budget      Int
+  clientId    String
+  userId      String
+  Transaction Transaction[]
+  Task        Task[]
+}
+
+enum Status {
+  COMPLETE
+  IN_PROGRESS
+}
+
+model Task {
+  id          String  @id @default(uuid())
+  description String
+  status      Status  @default(IN_PROGRESS)
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
