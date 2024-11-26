@@ -1,8 +1,17 @@
-import { SignIn } from '@clerk/nextjs'
+import { SignIn, ClerkLoaded, ClerkLoading } from '@clerk/nextjs'
+import { Loader2 } from 'lucide-react'
 import React from 'react'
 
 export default function SignInPage() {
+
   return (
-    <SignIn path='/sign-in' />
+    <>
+      <ClerkLoaded>
+        <SignIn path="/sign-in" />
+      </ClerkLoaded>
+      <ClerkLoading>
+        <Loader2 className="size-4 animate-spin text-shade" />
+      </ClerkLoading>
+    </>
   )
 }
