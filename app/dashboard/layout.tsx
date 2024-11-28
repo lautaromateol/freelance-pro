@@ -1,6 +1,8 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { SheetProvider } from "@/providers/sheet-provider"
 import { SidebarProvider } from "@/providers/sidebar-provider"
+import { Toaster } from "sonner"
 
 type Props = {
   children: React.ReactNode
@@ -13,7 +15,11 @@ export default function DashboardLayout({ children }: Props) {
         <AppSidebar />
         <div className="flex w-full flex-col p-4">
           <SidebarTrigger />
-          <main className="p-6">{children}</main>
+          <main className="p-6">
+            <Toaster />
+            <SheetProvider />
+            {children}
+          </main>
         </div>
       </div>
     </SidebarProvider>
