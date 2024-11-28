@@ -25,7 +25,7 @@ export function NewClientSheet() {
         <SheetHeader>
           <SheetTitle>Create a new client</SheetTitle>
         </SheetHeader>
-        <ClientForm onSubmit={onSubmit} disabled={isPending} />
+        <ClientForm onSubmit={onSubmit} disabled={isPending} defaultValues={{ name: "" }} />
       </SheetContent>
     </Sheet>
   )

@@ -25,7 +25,7 @@ export function NewCategorySheet() {
         <SheetHeader>
           <SheetTitle>Create a new category</SheetTitle>
         </SheetHeader>
-        <CategoryForm onSubmit={onSubmit} disabled={isPending} />
+        <CategoryForm onSubmit={onSubmit} disabled={isPending} defaultValues={{ name: "" }} />
       </SheetContent>
     </Sheet>
   )

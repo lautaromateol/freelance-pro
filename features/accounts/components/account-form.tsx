@@ -12,7 +12,7 @@ type FormValues = z.input<typeof accountSchema>
 
 type Props = {
   id?: string
-  defaultValues?: FormValues
+  defaultValues: FormValues
   onSubmit: (json: FormValues) => void
   onDelete?: () => void
   disabled: boolean

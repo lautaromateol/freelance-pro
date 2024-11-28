@@ -12,7 +12,7 @@ type FormValues = z.input<typeof clientSchema>
 
 type Props = {
   id?: string
-  defaultValues?: FormValues
+  defaultValues: FormValues
   onSubmit: (json: FormValues) => void
   onDelete?: () => void
   disabled: boolean
@@ -43,7 +43,7 @@ export function ClientForm({ id, defaultValues, onSubmit, onDelete, disabled }: 
             <FormItem>
               <FormLabel>Client name</FormLabel>
               <FormControl>
-                <Input disabled={disabled} placeholder="eg. Tools and Software, Workspace, etc." {...field} />
+                <Input disabled={disabled} placeholder="eg. John Doe" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

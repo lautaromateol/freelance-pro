@@ -25,7 +25,7 @@ export function NewAccountSheet() {
         <SheetHeader>
           <SheetTitle>Create a new account</SheetTitle>
         </SheetHeader>
-        <AccountForm onSubmit={onSubmit} disabled={isPending} />
+        <AccountForm onSubmit={onSubmit} disabled={isPending} defaultValues={{ name: "" }} />
       </SheetContent>
     </Sheet>
   )
