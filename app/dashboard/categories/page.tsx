@@ -59,8 +59,9 @@ export default function CategoriesPage() {
             columns={columns}
             onDelete={(rows, setRowsSelected) => {
               const ids = rows.map((row) => row.original.id)
-              deleteAccounts({ ids })
-              setRowsSelected({})
+              deleteAccounts({ ids }, {
+                onSuccess: () => setRowsSelected({})
+              })
             }}
             disabled={isPending}
           />
