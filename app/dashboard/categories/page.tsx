@@ -2,7 +2,7 @@
 import { Loader2, PlusIcon } from "lucide-react";
 import { useNewCategory } from "@/features/categories/hooks/use-new-category";
 import { useGetCategories } from "@/features/categories/api/use-get-categories";
-import { useDeleteAccounts } from "@/features/accounts/api/use-delete-accounts";
+import { useDeleteCategories } from "@/features/categories/api/use-delete-categories";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/data-table";
@@ -14,7 +14,7 @@ export default function CategoriesPage() {
   const categoriesQuery = useGetCategories()
   const categories = categoriesQuery.data || []
 
-  const { deleteAccounts, isPending } = useDeleteAccounts()
+  const { deleteCategories, isPending } = useDeleteCategories()
 
   if (categoriesQuery.isPending) {
     return (
@@ -59,7 +59,7 @@ export default function CategoriesPage() {
             columns={columns}
             onDelete={(rows, setRowsSelected) => {
               const ids = rows.map((row) => row.original.id)
-              deleteAccounts({ ids }, {
+              deleteCategories({ ids }, {
                 onSuccess: () => setRowsSelected({})
               })
             }}

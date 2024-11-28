@@ -2,7 +2,7 @@
 import { Loader2, PlusIcon } from "lucide-react";
 import { useNewClient } from "@/features/clients/hooks/use-new-client";
 import { useGetClients } from "@/features/clients/api/use-get-clients";
-import { useDeleteAccounts } from "@/features/accounts/api/use-delete-accounts";
+import { useDeleteClients } from "@/features/clients/api/use-delete-clients";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/data-table";
@@ -14,7 +14,7 @@ export default function ClientsPage() {
   const clientsQuery = useGetClients()
   const clients = clientsQuery.data || []
 
-  const { deleteAccounts, isPending } = useDeleteAccounts()
+  const { deleteClients, isPending } = useDeleteClients()
 
   if (clientsQuery.isPending) {
     return (
@@ -59,7 +59,7 @@ export default function ClientsPage() {
             columns={columns}
             onDelete={(rows, setRowsSelected) => {
               const ids = rows.map((row) => row.original.id)
-              deleteAccounts({ ids }, {
+              deleteClients({ ids }, {
                 onSuccess: () => setRowsSelected({})
               })
             }}
