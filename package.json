@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma generate && next build",
+    "build": "prisma generate $(test $NODE_ENV = 'production' && echo '--no-engine') && next build",
     "start": "next start",
     "lint": "next lint"
   },
