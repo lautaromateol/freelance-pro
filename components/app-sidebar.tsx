@@ -7,22 +7,22 @@ import { SignOutButton } from "./sign-out-button"
 const routes = [
   {
     label: "Accounts",
-    href: "/accounts",
+    href: "/dashboard/accounts",
     icon: <Banknote />
   },
   {
     label: "Categories",
-    href: "/categories",
+    href: "/dashboard/categories",
     icon: <LayoutGrid />
   },
   {
     label: "Transactions",
-    href: "/transactions",
+    href: "/dashboard/transactions",
     icon: <ArrowLeftRight />
   },
   {
     label: "Projects",
-    href: "/projects",
+    href: "/dashboard/projects",
     icon: <Folders />
   }
 ]
