@@ -35,10 +35,11 @@ model Client {
 }
 
 model Transaction {
-  id         String  @id @default(uuid())
+  id         String   @id @default(uuid())
   name       String
   notes      String?
   payee      String
+  date       DateTime
   categoryId String?
   accountId  String
   projectId  String?
