@@ -4,8 +4,8 @@ import { NewAccountSheet } from "@/features/accounts/components/new-account-shee
 import { OpenAccountSheet } from "@/features/accounts/components/open-account-sheet";
 import { NewCategorySheet } from "@/features/categories/components/new-category-sheet";
 import { OpenCategorySheet } from "@/features/categories/components/open-category-sheet";
-import { OpenClientSheet } from "@/features/clients/components/open-client-sheet";
 import { NewClientSheet } from "@/features/clients/components/new-client-sheet";
+import { OpenClientSheet } from "@/features/clients/components/open-client-sheet";
 
 export function SheetProvider() {
 
