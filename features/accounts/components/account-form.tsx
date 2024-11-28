@@ -53,7 +53,7 @@ export function AccountForm({ id, defaultValues, onSubmit, onDelete, disabled }:
           className="w-full mt-2"
           disabled={disabled}
         >
-          {id ? "Update account" : "Add account"}
+          {id ? "Save changes" : "Add account"}
         </Button>
       </form>
       {!!id && (
