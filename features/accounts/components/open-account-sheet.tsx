@@ -44,7 +44,7 @@ export function OpenAccountSheet() {
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Create a new account</SheetTitle>
+          <SheetTitle>Update account</SheetTitle>
         </SheetHeader>
         {accountQuery.isLoading ? (
           <div className="space-y-2 mt-4">
