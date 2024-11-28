@@ -40,6 +40,8 @@ export function OpenCategorySheet() {
     })
   }
 
+  const defaultValues = categoryQuery.data ? { name: categoryQuery.data.name } : { name: "" }
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent>
@@ -54,7 +56,7 @@ export function OpenCategorySheet() {
             <Skeleton className="h-8 w-full" />
           </div>
         ) : (
-          <CategoryForm id={category?.id} defaultValues={category} disabled={isPending} onSubmit={onSubmit} onDelete={onDelete} />
+          <CategoryForm id={category?.id} defaultValues={defaultValues} disabled={isPending} onSubmit={onSubmit} onDelete={onDelete} />
         )}
       </SheetContent>
     </Sheet>

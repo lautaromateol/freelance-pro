@@ -40,6 +40,8 @@ export function OpenClientSheet() {
     })
   }
 
+  const defaultValues = clientQuery.data ? { name: clientQuery.data.name } : { name: "" }
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent>
@@ -54,7 +56,7 @@ export function OpenClientSheet() {
             <Skeleton className="h-8 w-full" />
           </div>
         ) : (
-          <ClientForm id={client?.id} defaultValues={client} disabled={isPending} onSubmit={onSubmit} onDelete={onDelete} />
+          <ClientForm id={client?.id} defaultValues={defaultValues} disabled={isPending} onSubmit={onSubmit} onDelete={onDelete} />
         )}
       </SheetContent>
     </Sheet>

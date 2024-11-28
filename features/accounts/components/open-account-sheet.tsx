@@ -40,6 +40,8 @@ export function OpenAccountSheet() {
     })
   }
 
+  const defaultValues = accountQuery.data ? { name: accountQuery.data.name } : { name: "" }
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent>
@@ -54,7 +56,7 @@ export function OpenAccountSheet() {
             <Skeleton className="h-8 w-full" />
           </div>
         ) : (
-          <AccountForm id={account?.id} defaultValues={account} disabled={isPending} onSubmit={onSubmit} onDelete={onDelete} />
+          <AccountForm id={account?.id} defaultValues={defaultValues} disabled={isPending} onSubmit={onSubmit} onDelete={onDelete} />
         )}
       </SheetContent>
     </Sheet>
