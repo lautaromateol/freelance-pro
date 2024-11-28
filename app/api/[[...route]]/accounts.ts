@@ -22,12 +22,14 @@ const app = new Hono()
 
     return c.json({ data }, 200)
   })
-  .get("/:id", async (c) => {
+  .get("/:id", 
+    zValidator("param", z.object({ id: z.string().optional() })),
+    async (c) => {
     const auth = getAuth(c)
     const id = c.req.param("id")
 
     if (!id) {
-      return c.json({ message: "ID Missing" }, 400)
+      return c.json({ message: "Missing ID" }, 400)
     }
 
     if (!auth?.userId) {
@@ -73,10 +75,11 @@ const app = new Hono()
   )
   .patch("/:id",
     zValidator("json", accountSchema),
+    zValidator("param", z.object({ id: z.string().optional() })),
     async (c) => {
       const auth = getAuth(c)
-      const id = c.req.param("id")
       const { name } = c.req.valid("json")
+      const { id } = c.req.valid("param")
 
       if (!id) {
         return c.json({ message: "Missing ID" }, 400)
@@ -102,9 +105,11 @@ const app = new Hono()
 
       return c.json({ data }, 200)
     })
-  .delete("/:id", async (c) => {
+  .delete("/:id", 
+    zValidator("param", z.object({ id: z.string().optional() })),
+    async (c) => {
     const auth = getAuth(c)
-    const id = c.req.param("id")
+    const { id } = c.req.valid("param")
 
     if (!id) {
       return c.json({ message: "Missing ID" }, 400)
