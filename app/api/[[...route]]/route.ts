@@ -4,6 +4,7 @@ import { handle } from "hono/vercel"
 import accounts from "./accounts"
 import categories from "./categories"
 import clients from "./clients"
+import transactions from "./transactions"
 
 export const runtime = "edge"
 
@@ -13,6 +14,7 @@ const routes = app
   .route("/accounts", accounts)
   .route("/categories", categories)
   .route("/clients", clients)
+  .route("/transactions", transactions)
 
   
   export const GET = handle(app)
