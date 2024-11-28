@@ -39,6 +39,7 @@ model Transaction {
   name       String
   notes      String?
   payee      String
+  amount     Int
   date       DateTime
   categoryId String?
   accountId  String
