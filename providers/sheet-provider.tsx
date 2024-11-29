@@ -6,6 +6,8 @@ import { NewCategorySheet } from "@/features/categories/components/new-category-
 import { OpenCategorySheet } from "@/features/categories/components/open-category-sheet";
 import { NewClientSheet } from "@/features/clients/components/new-client-sheet";
 import { OpenClientSheet } from "@/features/clients/components/open-client-sheet";
+import { NewTransactionSheet } from "@/features/transactions/components/new-transaction-sheet";
+import { OpenTransactionSheet } from "@/features/transactions/components/open-transaction-sheet";
 
 export function SheetProvider() {
 
@@ -24,6 +26,8 @@ export function SheetProvider() {
         <OpenCategorySheet />
         <NewClientSheet />
         <OpenClientSheet />
+        <NewTransactionSheet />
+        <OpenTransactionSheet />
       </>
     )
   }
