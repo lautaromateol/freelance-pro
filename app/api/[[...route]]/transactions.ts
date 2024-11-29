@@ -1,14 +1,14 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { subDays } from "date-fns"
+import { format, subDays } from "date-fns"
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import { zValidator } from "@hono/zod-validator";
 import { prisma } from "@/lib/prisma";
 import { transactionApiSchema } from "@/schemas/transactions";
 
 const app = new Hono()
+  .use("*", clerkMiddleware())
   .get("/",
-    clerkMiddleware(),
     zValidator("query", z.object({
       from: z.string().optional(),
       to: z.string().optional(),
@@ -21,9 +21,12 @@ const app = new Hono()
       if (!auth?.userId) {
         return c.json({ message: 'Unauthorized' }, 401)
       }
+      
+      const defaultTo = new Date()
+      const defaultFrom = subDays(defaultTo, 30)
 
-      const defaultFrom = from ? new Date(from) : subDays(new Date(), 30)
-      const defaultTo = to ? new Date(to) : new Date()
+      const start = from ? format(from, "yyyy-MM-dddd") : defaultFrom
+      const end = to ? format(to, "yyyy-MM-dddd") : defaultTo
 
       const data = await prisma.transaction.findMany({
         where: {
@@ -32,8 +35,8 @@ const app = new Hono()
             userId: auth?.userId
           },
           date: {
-            gte: defaultFrom,
-            lte: defaultTo
+            gte: start,
+            lte: end
           }
         }
       })
@@ -42,7 +45,6 @@ const app = new Hono()
     }
   )
   .get("/:id",
-    clerkMiddleware(),
     zValidator("param", z.object({ id: z.string().optional() })),
     async (c) => {
       const auth = getAuth(c)
@@ -72,8 +74,7 @@ const app = new Hono()
       return c.json({ data }, 200)
     }
   )
-  .patch("/:id",
-    clerkMiddleware(),
+  .patch("/:id",  
     zValidator("json", transactionApiSchema),
     zValidator("param", z.object({ id: z.string().optional() })),
     async (c) => {
@@ -107,7 +108,6 @@ const app = new Hono()
     }
   )
   .post("/",
-    clerkMiddleware(),
     zValidator("json", transactionApiSchema),
     async (c) => {
       const auth = getAuth(c)
@@ -126,7 +126,6 @@ const app = new Hono()
     }
   )
   .delete("/:id",
-    clerkMiddleware(),
     zValidator("param", z.object({ id: z.string().optional() })),
     async (c) => {
       const auth = getAuth(c)
