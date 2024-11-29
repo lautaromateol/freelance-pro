@@ -1,12 +1,10 @@
 import { client } from "@/lib/client";
+import { convertAmountFromMilliunits } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { InferResponseType } from "hono";
-
-type ResponseType = InferResponseType<typeof client.api.transactions.$get>
 
 export function useGetTransactions(from?: string, to?: string, accountId?: string) {
-  const query = useQuery<ResponseType, Error>({
-    queryKey: ["transaction"],
+  const query = useQuery({
+    queryKey: ["transactions"],
     queryFn: async () => {
       const response = await client.api.transactions.$get({
         query: {
@@ -16,9 +14,16 @@ export function useGetTransactions(from?: string, to?: string, accountId?: strin
         }
       })
 
-      const data = await response.json()
+      if (!response.ok) {
+        throw new Error("Error obtaining transactions.")
+      }
 
-      return data
+      const { data } = await response.json()
+
+      return data.map((item) => ({
+        ...item,
+        amount: convertAmountFromMilliunits(item.amount)
+      }))
     }
   })
 

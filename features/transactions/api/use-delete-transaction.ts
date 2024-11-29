@@ -1,15 +1,14 @@
 import { client } from "@/lib/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { InferRequestType, InferResponseType } from "hono";
+import { InferResponseType } from "hono";
 import { toast } from "sonner";
 
-type RequestType = InferRequestType<typeof client.api.transactions[":id"]["$delete"]>["param"]
 type ResponseType = InferResponseType<typeof client.api.transactions[":id"]["$delete"]>
 
 export function useDeleteTransaction(id?: string) {
   const queryClient = useQueryClient()
 
-  const { mutate: deleteTransaction, isPending } = useMutation<ResponseType, Error, RequestType>({
+  const { mutate: deleteTransaction, isPending } = useMutation<ResponseType, Error>({
     mutationFn: async () => {
       const response = await client.api.transactions[":id"]["$delete"]({
         param: { id }
