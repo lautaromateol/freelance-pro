@@ -36,7 +36,6 @@ model Client {
 
 model Transaction {
   id         String   @id @default(uuid())
-  name       String
   notes      String?
   payee      String
   amount     Int

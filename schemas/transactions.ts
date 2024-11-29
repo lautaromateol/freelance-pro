@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 export const transactionApiSchema = z.object({
-  name: z.string(),
   notes: z.string().optional(),
   payee: z.string(),
   amount: z.number(),
@@ -12,7 +11,6 @@ export const transactionApiSchema = z.object({
 })
 
 export const transactionSchema = z.object({
-  name: z.string(),
   notes: z.string().optional(),
   payee: z.string(),
   amount: z.string(),
