@@ -96,10 +96,7 @@ const app = new Hono()
             userId: auth.userId
           }
         },
-        data: {
-          ...values,
-          amount: parseInt(values.amount)
-        }
+        data: values
       })
 
       if (!data) {
@@ -115,16 +112,14 @@ const app = new Hono()
     async (c) => {
       const auth = getAuth(c)
       const values = c.req.valid("json")
-
+      
       if (!auth?.userId) {
         return c.json({ message: 'Unauthorized' }, 401)
       }
 
+
       const data = await prisma.transaction.create({
-        data: {
-          ...values,
-          amount: parseInt(values.amount)
-        }
+        data: values
       })
 
       return c.json({ data }, 200)
