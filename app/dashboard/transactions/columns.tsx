@@ -1,12 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { InferResponseType } from "hono"
 import { format } from "date-fns"
 import { ColumnDef } from "@tanstack/react-table"
-import { ClientDropdown } from "@/features/clients/components/client-dropdown"
 import { TransactionDropdown } from "@/features/transactions/components/transaction-dropdown"
+import { CategoryCell } from "@/features/categories/components/category-cell"
+import { AccountCell } from "@/features/accounts/components/account-cell"
 import { client } from "@/lib/client"
 import { convertToCurrency } from "@/lib/utils"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Badge } from "@/components/ui/badge"
 
 type ResponseType = InferResponseType<typeof client.api.transactions.$get, 200>["data"][0]
 
@@ -46,9 +47,43 @@ export const columns: ColumnDef<ResponseType>[] = [
     accessorKey: "amount",
     header: "Amount",
     cell: ({ row }) => {
-      const amount = convertToCurrency(row.getValue("amount"))
+      const amountUnformatted = row.getValue("amount") as number
+      const amount = convertToCurrency(amountUnformatted)
 
-      return <p>{amount}</p>
+      return (
+        <Badge variant={
+          amountUnformatted > 0 ? "primary" : "destructive"
+        }>
+          {amount}
+        </Badge>
+      )
+    }
+  },
+  {
+    accessorKey: "categoryId",
+    header: "Category",
+    cell: ({ row }) => {
+      const categoryId = row.getValue("categoryId") as string
+      const transaction = row.original
+      const category = transaction.category
+
+      return (
+        <CategoryCell id={categoryId ?? ""} name={category ? category.name : ""} />
+      )
+
+    }
+  },
+  {
+    accessorKey: "accountId",
+    header: "Account",
+    cell: ({ row }) => {
+      const accountId = row.getValue("accountId") as string
+      const transaction = row.original
+      const name = transaction.account.name
+
+      return (
+        <AccountCell id={accountId} name={name} />
+      )
     }
   },
   {
