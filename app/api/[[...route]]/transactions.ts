@@ -38,6 +38,18 @@ const app = new Hono()
             gte: start,
             lte: end
           }
+        },
+        include: {
+          account: {
+            select: {
+              name: true
+            }
+          },
+          category: {
+            select: {
+              name: true
+            }
+          }
         }
       })
 
