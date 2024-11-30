@@ -109,14 +109,18 @@ export function TransactionForm({ id, defaultValues, onSubmit, onDelete, disable
             </FormItem>
           )}
         />
-         <FormField
+        <FormField
           control={form.control}
           name="notes"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Notes (optional)</FormLabel>
               <FormControl>
-                <Textarea disabled={disabled} {...field} />
+                <Textarea
+                  {...field}
+                  disabled={disabled}
+                  value={field.value ?? ""}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
