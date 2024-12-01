@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react"
 import { useOpenTransaction } from "@/features/transactions/hooks/use-open-transaction"
 import { useEditTransaction } from "@/features/transactions/api/use-edit-transaction"
 import { useGetTransaction } from "@/features/transactions/api/use-get-transaction"
+import { useDeleteTransaction } from "@/features/transactions/api/use-delete-transaction"
 import { useGetCategories } from "@/features/categories/api/use-get-categories"
 import { useGetAccounts } from "@/features/accounts/api/use-get-accounts"
 import { useCreateCategory } from "@/features/categories/api/use-create-category"
@@ -12,7 +13,6 @@ import { transactionSchema } from "@/schemas/transactions"
 import { convertAmountToMilliunits } from "@/lib/utils"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { TransactionForm } from "./transaction-form"
-import { useDeleteTransaction } from "../api/use-delete-transaction"
 
 type FormValues = z.input<typeof transactionSchema>
 
@@ -83,7 +83,7 @@ export function OpenTransactionSheet() {
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Create new transaction</SheetTitle>
+          <SheetTitle>Edit transaction</SheetTitle>
         </SheetHeader>
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center">
