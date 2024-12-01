@@ -1,7 +1,7 @@
 "use client"
 import { z } from "zod"
 import { Loader2 } from "lucide-react"
-import { useNewTransaction } from "@/features/transactions/hooks/use-new-transaction"
+import { useNewProject } from "@/features/projects/hooks/use-new-project"
 import { useCreateProject } from "@/features/projects/api/use-create-project"
 import { useGetClients } from "@/features/clients/api/use-get-clients"
 import { useCreateClient } from "@/features/clients/api/use-create-client"
@@ -14,7 +14,7 @@ type FormValues = z.input<typeof projectSchema>
 
 export function NewProjectSheet() {
 
-  const { isOpen, onClose } = useNewTransaction()
+  const { isOpen, onClose } = useNewProject()
   const { createProject, isPending: isCreatingProject } = useCreateProject()
 
   function onSubmit(json: FormValues) {
