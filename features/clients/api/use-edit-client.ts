@@ -22,6 +22,7 @@ export function useEditClient(id?: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["client", { id }] })
       queryClient.invalidateQueries({ queryKey: ["clients"] })
+      queryClient.invalidateQueries({ queryKey: ["projects"] })
       toast.success("Client updated successfully.")
     },
     onError: () => {
