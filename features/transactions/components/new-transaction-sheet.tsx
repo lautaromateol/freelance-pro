@@ -23,7 +23,7 @@ export function NewTransactionSheet() {
 
     const payload = {
       ...json,
-      amount: convertAmountToMilliunits(parseFloat(json.amount))
+      amount: convertAmountToMilliunits(parseFloat(json.amount.replace(",", ".")))
     }
 
     createTransaction(payload, {
