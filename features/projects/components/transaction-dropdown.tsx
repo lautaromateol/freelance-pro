@@ -8,7 +8,7 @@ type Props = {
   id: string
 }
 
-export function TransactionDropdown({ id }: Props) {
+export function ProjectDropdown({ id }: Props) {
 
   const { onOpen } = useOpenProject()
 
