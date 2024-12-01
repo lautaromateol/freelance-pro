@@ -108,7 +108,7 @@ export function ProjectForm({ id, defaultValues, onSubmit, onDelete, disabled, c
           name="budget"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Amount</FormLabel>
+              <FormLabel>Budget</FormLabel>
               <FormControl>
                 <Input disabled={disabled} type="number" {...field}/>
               </FormControl>
