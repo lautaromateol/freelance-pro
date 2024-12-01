@@ -55,7 +55,7 @@ export default function TransactionsPage() {
         <CardContent>
           <DataTable
             data={projects}
-            filterKey="payee"
+            filterKey="name"
             columns={columns}
             onDelete={(rows, setRowsSelected) => {
               const ids = rows.map((row) => row.original.id)
