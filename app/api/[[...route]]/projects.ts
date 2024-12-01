@@ -17,6 +17,13 @@ const app = new Hono()
     const data = await prisma.project.findMany({
       where: {
         userId: auth.userId
+      },
+      include: {
+        client: {
+          select: {
+            name: true
+          }
+        }
       }
     })
 
