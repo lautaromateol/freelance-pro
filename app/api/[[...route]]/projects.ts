@@ -67,7 +67,10 @@ const app = new Hono()
       }
 
       const data = await prisma.project.create({
-        data: values
+        data: {
+          ...values,
+          userId: auth?.userId
+        }
       })
 
       return c.json({ data }, 200)
