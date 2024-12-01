@@ -9,7 +9,6 @@ import { Select } from "@/components/select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { AmountInput } from "@/components/amount-input"
 
 type FormValues = z.input<typeof projectSchema>
 
@@ -59,7 +58,7 @@ export function ProjectForm({ id, defaultValues, onSubmit, onDelete, disabled, c
           name="releaseDate"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Date</FormLabel>
+              <FormLabel>Release Date</FormLabel>
               <FormControl>
                 <DatePicker date={field.value ?? undefined} onChange={field.onChange} />
               </FormControl>
@@ -72,7 +71,7 @@ export function ProjectForm({ id, defaultValues, onSubmit, onDelete, disabled, c
           name="clientId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Category</FormLabel>
+              <FormLabel>Client</FormLabel>
               <FormControl>
                 <Select
                   placeholder="Select or create a client"
@@ -111,7 +110,7 @@ export function ProjectForm({ id, defaultValues, onSubmit, onDelete, disabled, c
             <FormItem>
               <FormLabel>Amount</FormLabel>
               <FormControl>
-                <AmountInput onChange={field.onChange} value={field.value} disabled={disabled} />
+                <Input disabled={disabled} type="number" {...field}/>
               </FormControl>
             </FormItem>
           )}
