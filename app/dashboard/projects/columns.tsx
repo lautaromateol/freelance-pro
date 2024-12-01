@@ -1,7 +1,7 @@
 import { InferResponseType } from "hono"
 import { format } from "date-fns"
 import { ColumnDef } from "@tanstack/react-table"
-import { TransactionDropdown } from "@/features/transactions/components/transaction-dropdown"
+import { ProjectDropdown } from "@/features/projects/components/transaction-dropdown"
 import { ClientCell } from "@/features/clients/components/client-cell"
 import { client } from "@/lib/client"
 import { convertToCurrency } from "@/lib/utils"
@@ -41,7 +41,7 @@ export const columns: ColumnDef<ResponseType>[] = [
     accessorKey: "releaseDate",
     header: "Release Date",
     cell: ({ row }) => {
-      const date = format(row.getValue("date"), "PPP")
+      const date = format(row.getValue("releaseDate"), "PPP")
 
       return <p>{date}</p>
     }
@@ -80,7 +80,7 @@ export const columns: ColumnDef<ResponseType>[] = [
       const transaction = row.original
 
       return (
-        <TransactionDropdown id={transaction.id} />
+        <ProjectDropdown id={transaction.id} />
       )
     }
   },
