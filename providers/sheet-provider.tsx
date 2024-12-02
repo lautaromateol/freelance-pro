@@ -9,6 +9,7 @@ import { OpenClientSheet } from "@/features/clients/components/open-client-sheet
 import { NewTransactionSheet } from "@/features/transactions/components/new-transaction-sheet";
 import { OpenTransactionSheet } from "@/features/transactions/components/open-transaction-sheet";
 import { NewProjectSheet } from "@/features/projects/components/new-project-sheet";
+import { OpenProjectSheet } from "@/features/projects/components/open-project-sheet";
 
 export function SheetProvider() {
 
@@ -30,7 +31,7 @@ export function SheetProvider() {
         <NewTransactionSheet />
         <OpenTransactionSheet />
         <NewProjectSheet />
-        <NewTransactionSheet />
+        <OpenProjectSheet />
       </>
     )
   }
