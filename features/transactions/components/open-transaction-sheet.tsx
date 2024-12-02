@@ -59,7 +59,7 @@ export function OpenTransactionSheet() {
   const projectsQuery = useGetProjects()
   const projects = projectsQuery.data || []
 
-  const isLoading = categoriesQuery.isLoading || accountsQuery.isLoading || projectsQuery.isLoading
+  const isLoading = categoriesQuery.isLoading || accountsQuery.isLoading || projectsQuery.isLoading || transactionQuery.isLoading
 
   const isPending = isCreatingCategory || isCreatingAccount || isEditingTransaction || isDeletingTransaction
 
