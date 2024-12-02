@@ -29,33 +29,54 @@ const app = new Hono()
 
     return c.json({ data }, 200)
   })
-  .get("/:id", 
+  .get("/:id",
     zValidator("param", z.object({ id: z.string().optional() })),
     async (c) => {
-    const auth = getAuth(c)
-    const id = c.req.param("id")
+      const auth = getAuth(c)
+      const id = c.req.param("id")
 
-    if (!id) {
-      return c.json({ message: "Missing ID" }, 400)
-    }
-
-    if (!auth?.userId) {
-      return c.json({ message: 'Unauthorized' }, 401)
-    }
-
-    const data = await prisma.project.findUnique({
-      where: {
-        id,
-        userId: auth.userId
+      if (!id) {
+        return c.json({ message: "Missing ID" }, 400)
       }
+
+      if (!auth?.userId) {
+        return c.json({ message: 'Unauthorized' }, 401)
+      }
+
+      const data = await prisma.project.findUnique({
+        where: {
+          id,
+          userId: auth.userId
+        },
+        include: {
+          client: {
+            select: {
+              name: true
+            }
+          },
+          Transaction: {
+            include: {
+              category: {
+                select: {
+                  name: true
+                }
+              },
+              account: {
+                select: {
+                  name: true
+                }
+              }
+            }
+          }
+        }
+      })
+
+      if (!data) {
+        return c.json({ message: `The project with the ID ${id} was not found` }, 404)
+      }
+
+      return c.json({ data }, 200)
     })
-
-    if (!data) {
-      return c.json({ message: `The project with the ID ${id} was not found` }, 404)
-    }
-
-    return c.json({ data }, 200)
-  })
   .post("/",
     zValidator("json", projectApiSchema),
     async (c) => {
@@ -102,34 +123,34 @@ const app = new Hono()
 
       return c.json({ data }, 200)
     })
-  .delete("/:id", 
+  .delete("/:id",
     zValidator("param", z.object({ id: z.string().optional() })),
     async (c) => {
-    const auth = getAuth(c)
-    const { id } = c.req.valid("param")
+      const auth = getAuth(c)
+      const { id } = c.req.valid("param")
 
-    if (!id) {
-      return c.json({ message: "Missing ID" }, 400)
-    }
-
-    if (!auth?.userId) {
-      return c.json({ message: 'Unauthorized' }, 401)
-    }
-
-    const data = await prisma.project.delete({
-      where: {
-        id,
-        userId: auth.userId
+      if (!id) {
+        return c.json({ message: "Missing ID" }, 400)
       }
+
+      if (!auth?.userId) {
+        return c.json({ message: 'Unauthorized' }, 401)
+      }
+
+      const data = await prisma.project.delete({
+        where: {
+          id,
+          userId: auth.userId
+        }
+      })
+
+      if (!data) {
+        return c.json({ message: `The project with the ID ${id} was not found` }, 404)
+      }
+
+      return c.json({ data }, 200)
+
     })
-
-    if (!data) {
-      return c.json({ message: `The project with the ID ${id} was not found` }, 404)
-    }
-
-    return c.json({ data }, 200)
-
-  })
   .post("/bulk-delete",
     zValidator("json", z.object({
       ids: z.array(z.string())
