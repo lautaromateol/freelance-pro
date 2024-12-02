@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { DialogProvider } from "@/providers/dialog-provider"
 import { SheetProvider } from "@/providers/sheet-provider"
 import { SidebarProvider } from "@/providers/sidebar-provider"
 import { Toaster } from "sonner"
@@ -18,6 +19,7 @@ export default function DashboardLayout({ children }: Props) {
           <main className="p-6">
             <Toaster />
             <SheetProvider />
+            <DialogProvider />
             {children}
           </main>
         </div>
