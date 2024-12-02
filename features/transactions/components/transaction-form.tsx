@@ -21,11 +21,12 @@ type Props = {
   categoriesOptions: { label: string, value: string }[] | undefined
   onCreateCategory: (name: string) => void
   accountsOptions: { label: string, value: string }[] | undefined
-  onCreateAccount: (name: string) => void
+  onCreateAccount: (name: string) => void,
+  projectsOptions: { label: string, value: string }[] | undefined
   disabled: boolean
 }
 
-export function TransactionForm({ id, defaultValues, onSubmit, onDelete, disabled, categoriesOptions, onCreateCategory, accountsOptions, onCreateAccount }: Props) {
+export function TransactionForm({ id, defaultValues, onSubmit, onDelete, disabled, categoriesOptions, onCreateCategory, accountsOptions, onCreateAccount, projectsOptions }: Props) {
 
   const form = useForm({
     resolver: zodResolver(transactionSchema),
@@ -90,6 +91,25 @@ export function TransactionForm({ id, defaultValues, onSubmit, onDelete, disable
                   disabled={disabled}
                   options={accountsOptions}
                   onCreate={onCreateAccount}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="projectId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Project</FormLabel>
+              <FormControl>
+                <Select
+                  placeholder="Select a project"
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={disabled}
+                  options={projectsOptions}
                 />
               </FormControl>
               <FormMessage />
