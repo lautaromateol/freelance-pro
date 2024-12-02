@@ -50,6 +50,11 @@ model Transaction {
   project  Project?  @relation(fields: [projectId], references: [id])
 }
 
+enum Status {
+  IN_PROGRESS
+  COMPLETE
+}
+
 model Project {
   id          String        @id @default(uuid())
   name        String
@@ -58,6 +63,7 @@ model Project {
   budget      Int
   clientId    String
   userId      String
+  status      Status        @default(IN_PROGRESS)
   client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
   Transaction Transaction[]
 }
