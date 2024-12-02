@@ -5,7 +5,7 @@ import { TransactionDropdown } from "@/features/transactions/components/transact
 import { CategoryCell } from "@/features/categories/components/category-cell"
 import { AccountCell } from "@/features/accounts/components/account-cell"
 import { client } from "@/lib/client"
-import { convertToCurrency } from "@/lib/utils"
+import { convertAmountFromMilliunits, convertToCurrency } from "@/lib/utils"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 
@@ -48,7 +48,7 @@ export const columns: ColumnDef<ResponseType>[] = [
     header: "Amount",
     cell: ({ row }) => {
       const amountUnformatted = row.getValue("amount") as number
-      const amount = convertToCurrency(amountUnformatted)
+      const amount = convertToCurrency(convertAmountFromMilliunits(amountUnformatted))
 
       return (
         <Badge variant={
