@@ -1,4 +1,4 @@
-"use client"
+"use project"
 import { z } from "zod"
 import { Loader2 } from "lucide-react"
 import { useNewTransaction } from "@/features/transactions/hooks/use-new-transaction"
@@ -7,6 +7,7 @@ import { useGetCategories } from "@/features/categories/api/use-get-categories"
 import { useGetAccounts } from "@/features/accounts/api/use-get-accounts"
 import { useCreateCategory } from "@/features/categories/api/use-create-category"
 import { useCreateAccount } from "@/features/accounts/api/use-create-account"
+import { useGetProjects } from "@/features/projects/api/use-get-projects"
 import { transactionSchema } from "@/schemas/transactions"
 import { convertAmountToMilliunits } from "@/lib/utils"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
@@ -39,7 +40,10 @@ export function NewTransactionSheet() {
   const { createAccount, isPending: isCreatingAccount } = useCreateAccount()
   const accounts = accountsQuery.data || []
 
-  const isLoading = categoriesQuery.isLoading || accountsQuery.isLoading
+  const projectsQuery = useGetProjects()
+  const projects = projectsQuery.data || []
+
+  const isLoading = categoriesQuery.isLoading || accountsQuery.isLoading || projectsQuery.isLoading
 
   const isPending = isCreatingCategory || isCreatingAccount || isCreatingTransaction
 
@@ -63,6 +67,13 @@ export function NewTransactionSheet() {
     createAccount({ name })
   }
 
+  const projectsOptions = projects.length > 0 ?
+  projects.map((item) => ({
+    label: item.name,
+    value: item.id
+  })) : undefined
+
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent>
@@ -82,6 +93,7 @@ export function NewTransactionSheet() {
               onCreateCategory={onCreateCategory}
               accountsOptions={accountsOptions}
               onCreateAccount={onCreateAccount}
+              projectsOptions={projectsOptions}
               disabled={isPending}
             />
           )}
