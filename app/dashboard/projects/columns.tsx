@@ -1,7 +1,7 @@
 import { InferResponseType } from "hono"
 import { format } from "date-fns"
 import { ColumnDef } from "@tanstack/react-table"
-import { ProjectDropdown } from "@/features/projects/components/transaction-dropdown"
+import { ProjectDropdown } from "@/features/projects/components/project-dropdown"
 import { ClientCell } from "@/features/clients/components/client-cell"
 import { client } from "@/lib/client"
 import { convertToCurrency } from "@/lib/utils"
@@ -77,10 +77,10 @@ export const columns: ColumnDef<ResponseType>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      const transaction = row.original
+      const project = row.original
 
       return (
-        <ProjectDropdown id={transaction.id} />
+        <ProjectDropdown id={project.id} />
       )
     }
   },
