@@ -41,9 +41,10 @@ export const columns: ColumnDef<ResponseType>[] = [
     accessorKey: "releaseDate",
     header: "Release Date",
     cell: ({ row }) => {
-      const date = format(row.getValue("releaseDate"), "PPP")
+      const date = row.getValue("releaseDate") as Date
+      const formatted = date ? format(date, "PPP") : "Undefined"
 
-      return <p>{date}</p>
+      return <p>{formatted}</p>
     }
   },
   {
