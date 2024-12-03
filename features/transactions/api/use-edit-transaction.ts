@@ -4,7 +4,7 @@ import { InferRequestType, InferResponseType } from "hono";
 import { toast } from "sonner";
 
 type RequestType = InferRequestType<typeof client.api.transactions[":id"]["$patch"]>["json"]
-type ResponseType = InferResponseType<typeof client.api.transactions[":id"]["$patch"]>
+type ResponseType = InferResponseType<typeof client.api.transactions[":id"]["$patch"], 200>["data"]
 
 export function useEditTransaction(id?: string) {
   const queryClient = useQueryClient()
@@ -16,17 +16,25 @@ export function useEditTransaction(id?: string) {
         json
       })
 
-      const data = await response.json()
+      if (!response.ok) {
+        throw new Error("Error updating transaction.")
+      }
+
+      const { data } = await response.json()
 
       return data
     },
-    onSuccess: () => {
+    onSuccess: (data: ResponseType) => {
       toast.success("Transaction updated successfully.")
       queryClient.invalidateQueries({ queryKey: ["transactions"] })
       queryClient.invalidateQueries({ queryKey: ["transaction", { id }] })
+
+      if (data.projectId) {
+        queryClient.invalidateQueries({ queryKey: ["project", { id: data.projectId }] })
+      }
     },
-    onError: () => {
-      toast.error("Error updating transaction.")
+    onError: (error) => {
+      toast.error(error.message)
     }
   })
 

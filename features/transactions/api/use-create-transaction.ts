@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { client } from "@/lib/client";
 
 type RequestType = InferRequestType<typeof client.api.transactions.$post>["json"]
-type ResponseType = InferResponseType<typeof client.api.transactions.$post>
+type ResponseType = InferResponseType<typeof client.api.transactions.$post, 200>["data"]
 
 export function useCreateTransaction() {
   const queryClient = useQueryClient()
@@ -12,15 +12,25 @@ export function useCreateTransaction() {
   const { mutate: createTransaction, isPending } = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async (json) => {
       const response = await client.api.transactions.$post({ json })
-      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error("Error creating transaction.")
+      }
+
+      const { data } = await response.json()
+
       return data
     },
-    onSuccess: () => {
+    onSuccess: (data: ResponseType) => {
       toast.success("Transaction created successfully.")
       queryClient.invalidateQueries({ queryKey: ["transactions"] })
+
+      if (data.projectId) {
+        queryClient.invalidateQueries({ queryKey: ["project", { id: data.projectId }] })
+      }
     },
-    onError: () => {
-      toast.error("Error creating transaction.")
+    onError: (error) => {
+      toast.error(error.message)
     }
   })
 
