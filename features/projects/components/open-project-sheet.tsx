@@ -49,7 +49,7 @@ export function OpenProjectSheet() {
   const { createClient, isPending: isCreatingClient } = useCreateClient()
   const clients = clientsQuery.data || []
 
-  const isLoading = clientsQuery.isLoading
+  const isLoading = clientsQuery.isLoading || projectQuery.isLoading
 
   const isPending = isCreatingClient || isEditingProject || isDeletingProject
 
