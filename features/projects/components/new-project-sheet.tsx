@@ -1,7 +1,6 @@
 "use client"
 import { z } from "zod"
 import { Loader2 } from "lucide-react"
-import { Status } from "@prisma/client/edge"
 import { useNewProject } from "@/features/projects/hooks/use-new-project"
 import { useCreateProject } from "@/features/projects/api/use-create-project"
 import { useGetClients } from "@/features/clients/api/use-get-clients"
@@ -22,8 +21,7 @@ export function NewProjectSheet() {
 
     const payload = {
       ...json,
-      budget: convertAmountToMilliunits(parseFloat(json.budget.replace(",", "."))),
-      status: Status.IN_PROGRESS
+      budget: convertAmountToMilliunits(parseFloat(json.budget.replace(",", ".")))
     }
 
     createProject(payload, {
