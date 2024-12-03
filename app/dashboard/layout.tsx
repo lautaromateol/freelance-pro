@@ -14,9 +14,9 @@ export default function DashboardLayout({ children }: Props) {
     <SidebarProvider>
       <div className="w-full min-h-screen flex">
         <AppSidebar />
-        <div className="flex w-full flex-col p-4">
+        <div className="flex w-full flex-col p-2 lg:p-4">
           <SidebarTrigger />
-          <main className="p-6">
+          <main className="p-2 lg:p-6">
             <Toaster />
             <SheetProvider />
             <DialogProvider />

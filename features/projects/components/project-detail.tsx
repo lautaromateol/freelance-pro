@@ -100,7 +100,7 @@ function Content() {
 
   return (
     <div className="space-y-6">
-      <div className="w-1/5 space-y-2">
+      <div className="w-1/2 lg:w-1/5 space-y-2">
         <div className="flex items-center gap-2">
           <Clock className="size-5 text-muted-foreground" />
           <h3 className="font-semibold">Release Date</h3>
@@ -131,8 +131,8 @@ function Content() {
             </div>
           )}
       </div>
-      <div className="grid grid-cols-4 gap-x-6">
-        <div className="space-y-2 col-span-3">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-y-6 lg:gap-y-0 lg:gap-x-6">
+        <div className="space-y-2 col-span-1 lg:col-span-3">
           <div className="flex items-center gap-2">
             <ListChecks className="h-5 w-5 text-muted-foreground" />
             <h3 className="font-semibold">Notes</h3>
@@ -141,7 +141,7 @@ function Content() {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Add some notes..."
-            className="min-h-[200px]"
+            className="min-h-[100px] lg:min-h-[200px] w-3/4 lg:w-full"
           />
           {notes !== project.notes && (
             <div className="flex items-center gap-x-2">
@@ -163,10 +163,10 @@ function Content() {
             </div>
           )}
         </div>
-        <div className="space-y-2 self-center place-self-center">
+        <div className="space-y-2 lg:self-center lg:place-self-center">
           <div className="flex items-center gap-2">
             <PieChart className="h-5 w-5 text-muted-foreground" />
-            <h3 className="font-semibold">Budget vs Spent.</h3>
+            <h3 className="font-semibold">Budget vs Spent</h3>
           </div>
           <BudgetComparisonChart budget={budget} spent={spent} />
         </div>
@@ -199,16 +199,16 @@ function Header() {
 
   return (
     <DialogHeader>
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <DialogTitle className="text-2xl">{project.name}</DialogTitle>
+      <div className="flex flex-col gap-y-2 lg:gap-y-0 lg:flex-row items-start lg:items-center lg:justify-between">
+        <div className="space-y-0.5">
+          <DialogTitle className="text-2xl text-left">{project.name}</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             belongs to <span className="underline">{project.client.name}</span>
           </DialogDescription>
         </div>
         <Badge
           variant={!project.releaseDate ? "primary" : isAfter(new Date(), project.releaseDate) ? "destructive" : "primary"}
-          className="capitalize"
+          className="capitalize w-auto"
         >
           {!project.releaseDate ? "On time" : isAfter(new Date(), project.releaseDate) ? "Out of time" : "On time"}
         </Badge>
