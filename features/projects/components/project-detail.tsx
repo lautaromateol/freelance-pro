@@ -1,34 +1,52 @@
-import { useState } from "react"
+import { createContext, useContext, useState } from "react"
 import { InferResponseType } from "hono"
-import { Text, Wallet } from "lucide-react"
-import { client } from "@/lib/client"
+import { isAfter, isEqual } from "date-fns"
+import { Clock, CreditCard, ListChecks, PieChart } from "lucide-react"
 import { useDeleteTransactions } from "@/features/transactions/api/use-delete-transactions"
 import { useEditProject } from "@/features/projects/api/use-edit-project"
+import { client } from "@/lib/client"
+import { convertAmountFromMilliunits, convertAmountToMilliunits } from "@/lib/utils"
 import { DataTable } from "@/components/data-table"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import { DatePicker } from "@/components/date-picker"
+import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { columns } from "./project-transactions-columns"
-import { convertAmountToMilliunits } from "@/lib/utils"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Status } from "@prisma/client/edge"
+import { Badge } from "@/components/ui/badge"
+import { BudgetComparisonChart } from "./budget-spent-comparison-chart"
 
 type Project = InferResponseType<typeof client.api.projects[":id"]["$get"], 200>["data"]
 
 type Props = {
   project: Project
+  children: React.ReactNode
 }
 
-export function ProjectDetail({ project }: Props) {
+type ProjectContextType = {
+  project: Project
+  deleteTransactions: ReturnType<typeof useDeleteTransactions>["deleteTransactions"]
+  editProject: ReturnType<typeof useEditProject>["editProject"]
+  notes: string
+  setNotes: React.Dispatch<React.SetStateAction<string>>
+  releaseDate: Date | undefined
+  setReleaseDate: React.Dispatch<React.SetStateAction<Date | undefined>>
+  transactions: Project["Transaction"]
+  isPending: boolean
+  updateDate: () => void
+  updateNotes: () => void
+}
+
+const ProjectContext = createContext<ProjectContextType | undefined>(undefined)
+
+export function ProjectDetail({ project, children }: Props) {
 
   const { deleteTransactions, isPending: isDeletingTransactions } = useDeleteTransactions()
-
-  const [notes, setNotes] = useState(project.notes ?? "")
-  const [status, setStatus] = useState(project.status)
-
-  const transactions = project.Transaction ?? []
-
   const { editProject, isPending: isEditingProject } = useEditProject(project?.id)
 
+  const [notes, setNotes] = useState(project.notes ?? "")
+  const [releaseDate, setReleaseDate] = useState(project.releaseDate ? new Date(project.releaseDate) : undefined)
+
+  const transactions = project.Transaction ?? []
   const isPending = isDeletingTransactions || isEditingProject
 
   function updateNotes() {
@@ -37,84 +55,126 @@ export function ProjectDetail({ project }: Props) {
       name: project.name,
       releaseDate: project.releaseDate ? new Date(project.releaseDate) : null,
       clientId: project.clientId,
-      status: project.status,
       notes
-    })
+    },
+      {
+        onError: () => setNotes(project.notes ?? "")
+      })
   }
 
-  function onStatusChange(value: Status) {
-    const previousStatus = status
-    setStatus(value)
+  function updateDate() {
     editProject({
       budget: convertAmountToMilliunits(project.budget),
       name: project.name,
-      releaseDate: project.releaseDate ? new Date(project.releaseDate) : null,
       clientId: project.clientId,
       notes: project.notes,
-      status: value
+      releaseDate,
     }, {
-      onError: () => setStatus(previousStatus)
+      onError: () => setReleaseDate(project.releaseDate ? new Date(project.releaseDate) : undefined)
     })
   }
 
+  return (
+    <ProjectContext.Provider value={{ project, deleteTransactions, editProject, notes, setNotes, releaseDate, setReleaseDate, transactions, isPending, updateDate, updateNotes }}>
+      {children}
+    </ProjectContext.Provider>
+  )
+}
 
-  if (!project) return null
+function Content() {
+  const {
+    project,
+    deleteTransactions,
+    notes,
+    setNotes,
+    releaseDate,
+    setReleaseDate,
+    transactions,
+    isPending,
+    updateDate,
+    updateNotes,
+  } = useProjectContext()
+
+  const budget = project.budget
+  const spent = convertAmountFromMilliunits(transactions.filter((item) => item.amount < 0).reduce((acc, item) => item.amount + acc, 0)) * -1
 
   return (
     <div className="space-y-6">
-      <div className="w-1/5">
-        <Select onValueChange={onStatusChange} defaultValue={status}>
-          <SelectTrigger>
-            <SelectValue>
-              {status === "IN_PROGRESS" ? "In Progress" : "Complete"}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value={Status.IN_PROGRESS}>
-                In Progress
-              </SelectItem>
-              <SelectItem value={Status.COMPLETE}>
-                Complete
-              </SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-1">
-        <div className="flex items-center">
-          <Text className="size-6 text-gray-500 mr-2" />
-          <p className="font-semibold text-gray-900/90">Notes</p>
+      <div className="w-1/5 space-y-2">
+        <div className="flex items-center gap-2">
+          <Clock className="size-5 text-muted-foreground" />
+          <h3 className="font-semibold">Release Date</h3>
         </div>
-        <div className="flex flex-col gap-y-1.5">
+        <DatePicker
+          date={releaseDate}
+          onChange={setReleaseDate}
+          disabled={isPending}
+        />
+        {(((project.releaseDate && releaseDate) && (!isEqual(releaseDate, new Date(project.releaseDate))))
+          || (!project.releaseDate && releaseDate)) && (
+            <div className="flex items-center gap-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setReleaseDate(project.releaseDate ? new Date(project.releaseDate) : undefined)}
+                disabled={isPending}
+                size="sm"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={updateDate}
+                disabled={isPending}
+                size="sm"
+              >
+                Save
+              </Button>
+            </div>
+          )}
+      </div>
+      <div className="grid grid-cols-4 gap-x-6">
+        <div className="space-y-2 col-span-3">
+          <div className="flex items-center gap-2">
+            <ListChecks className="h-5 w-5 text-muted-foreground" />
+            <h3 className="font-semibold">Notes</h3>
+          </div>
           <Textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Add some notes..."
+            className="min-h-[200px]"
           />
-          <div className="flex items-center gap-x-2">
-            <Button
-              variant="outline"
-              onClick={() => setNotes(project.notes ?? "")}
-              disabled={isPending || notes === project.notes}
-              size="sm"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={updateNotes}
-              disabled={isPending || notes === project.notes}
-              size="sm"
-            >
-              Save
-            </Button>
+          {notes !== project.notes && (
+            <div className="flex items-center gap-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setNotes(project.notes ?? "")}
+                disabled={isPending}
+                size="sm"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={updateNotes}
+                disabled={isPending}
+                size="sm"
+              >
+                Save
+              </Button>
+            </div>
+          )}
+        </div>
+        <div className="space-y-2 self-center place-self-center">
+          <div className="flex items-center gap-2">
+            <PieChart className="h-5 w-5 text-muted-foreground" />
+            <h3 className="font-semibold">Budget vs Spent.</h3>
           </div>
+          <BudgetComparisonChart budget={budget} spent={spent} />
         </div>
       </div>
-      <div className="space-y-1">
-        <div className="flex items-center">
-          <Wallet className="size-6 text-gray-500 mr-2" />
-          <p className="font-semibold text-gray-900/90">Transactions</p>
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <CreditCard className="h-5 w-5 text-muted-foreground" />
+          <h3 className="font-semibold">Transactions</h3>
         </div>
         <DataTable
           data={transactions}
@@ -132,3 +192,38 @@ export function ProjectDetail({ project }: Props) {
     </div>
   )
 }
+
+function Header() {
+
+  const { project } = useProjectContext()
+
+  return (
+    <DialogHeader>
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <DialogTitle className="text-2xl">{project.name}</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            belongs to <span className="underline">{project.client.name}</span>
+          </DialogDescription>
+        </div>
+        <Badge
+          variant={!project.releaseDate ? "primary" : isAfter(new Date(), project.releaseDate) ? "destructive" : "primary"}
+          className="capitalize"
+        >
+          {!project.releaseDate ? "On time" : isAfter(new Date(), project.releaseDate) ? "Out of time" : "On time"}
+        </Badge>
+      </div>
+    </DialogHeader>
+  )
+}
+
+function useProjectContext() {
+  const context = useContext(ProjectContext)
+  if (!context) {
+    throw new Error("useProjectContext must be used inside ProjectDetail.")
+  }
+  return context
+}
+
+ProjectDetail.Content = Content
+ProjectDetail.Header = Header
