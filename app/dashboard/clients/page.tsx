@@ -3,12 +3,15 @@ import { Loader2, PlusIcon } from "lucide-react";
 import { useNewClient } from "@/features/clients/hooks/use-new-client";
 import { useGetClients } from "@/features/clients/api/use-get-clients";
 import { useDeleteClients } from "@/features/clients/api/use-delete-clients";
+import { useConfirm } from "@/hooks/use-confirm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/data-table";
 import { columns } from "./columns";
 
 export default function ClientsPage() {
+
+  const [confirm, ConfirmDialog] = useConfirm("Are you sure?", "You are going to delete all your projects.")
 
   const { onOpen } = useNewClient()
   const clientsQuery = useGetClients()
@@ -35,6 +38,7 @@ export default function ClientsPage() {
 
   return (
     <div className="max-w-screen-2xl mx-auto">
+      <ConfirmDialog />
       <Card className="shadow-none">
         <CardHeader>
           <div className="flex flex-col lg:flex-row gap-y-1 lg:gap-y-0 items-center justify-between">
@@ -57,11 +61,15 @@ export default function ClientsPage() {
             data={clients}
             filterKey="name"
             columns={columns}
-            onDelete={(rows, setRowsSelected) => {
-              const ids = rows.map((row) => row.original.id)
-              deleteClients({ ids }, {
-                onSuccess: () => setRowsSelected({})
-              })
+            onDelete={async (rows, setRowsSelected) => {
+              const ok = await confirm()
+
+              if (ok) {
+                const ids = rows.map((row) => row.original.id)
+                deleteClients({ ids }, {
+                  onSuccess: () => setRowsSelected({})
+                })
+              }
             }}
             disabled={isPending}
           />

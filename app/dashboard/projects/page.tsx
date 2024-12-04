@@ -3,12 +3,15 @@ import { Loader2, PlusIcon } from "lucide-react";
 import { useNewProject } from "@/features/projects/hooks/use-new-project";
 import { useGetProjects } from "@/features/projects/api/use-get-projects";
 import { useDeleteProjects } from "@/features/projects/api/use-delete-projects";
+import { useConfirm } from "@/hooks/use-confirm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/data-table";
 import { columns } from "./columns";
 
-export default function TransactionsPage() {
+export default function ProjectsPage() {
+
+  const [confirm, ConfirmDialog] = useConfirm("Are you sure?", "You are going to delete all your projects.")
 
   const { onOpen } = useNewProject()
   const projectsQuery = useGetProjects()
@@ -35,6 +38,7 @@ export default function TransactionsPage() {
 
   return (
     <div className="max-w-screen-2xl mx-auto">
+      <ConfirmDialog />
       <Card className="shadow-none">
         <CardHeader>
           <div className="flex flex-col lg:flex-row gap-y-1 lg:gap-y-0 items-center justify-between">
@@ -57,11 +61,15 @@ export default function TransactionsPage() {
             data={projects}
             filterKey="name"
             columns={columns}
-            onDelete={(rows, setRowsSelected) => {
-              const ids = rows.map((row) => row.original.id)
-              deleteProjects({ ids }, {
-                onSuccess: () => setRowsSelected({})
-              })
+            onDelete={async (rows, setRowsSelected) => {
+              const ok = await confirm()
+
+              if (ok) {
+                const ids = rows.map((row) => row.original.id)
+                deleteProjects({ ids }, {
+                  onSuccess: () => setRowsSelected({})
+                })
+              }
             }}
             disabled={isPending}
           />
