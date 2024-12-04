@@ -41,7 +41,7 @@ export default function ClientsPage() {
       <ConfirmDialog />
       <Card className="shadow-none">
         <CardHeader>
-          <div className="flex flex-col lg:flex-row gap-y-1 lg:gap-y-0 items-center justify-between">
+          <div className="flex flex-col lg:flex-row gap-y-4 lg:gap-y-0 items-center justify-between">
             <CardTitle>Your clients</CardTitle>
             <Button
               className="flex items-center"
