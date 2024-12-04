@@ -24,7 +24,7 @@ export function useCreateTransactions() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects"] })
+      queryClient.invalidateQueries({ queryKey: ["transactions"] })
       toast.success("Transactions imported successfully.")
     },
     onError: (error) => toast.error(error.message)
