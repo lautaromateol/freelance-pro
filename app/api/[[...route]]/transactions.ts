@@ -197,5 +197,24 @@ const app = new Hono()
       return c.json({ message: `${data.count} transactions deleted successfully.` }, 200)
     }
   )
+  .post("/bulk-create",
+    zValidator("json", z.object({
+      transactions: z.array(transactionApiSchema)
+    })),
+    async (c) => {
+      const auth = getAuth(c)
+      const { transactions } = c.req.valid("json")
+
+      if (!auth?.userId) {
+        return c.json({ message: 'Unauthorized' }, 401)
+      }
+
+      const data = await prisma.transaction.createMany({
+        data: transactions
+      })
+
+      return c.json({ data })
+    }
+  )
 
 export default app
