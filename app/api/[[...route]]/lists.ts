@@ -7,63 +7,6 @@ import { listSchema } from '@/schemas/list'
 
 const app = new Hono()
   .use('*', clerkMiddleware())
-  .get("/:projectId", 
-    zValidator("param", z.object({
-      projectId: z.string()
-    })),
-    async (c) => {
-      const auth = getAuth(c)
-      const { projectId } = c.req.valid("param")
-
-      if (!projectId) {
-        return c.json({ message: "Missing project ID" }, 400)
-      }
-
-      if (!auth?.userId) {
-        return c.json({ message: 'Unauthorized' }, 401)
-      }
-
-      const data = await prisma.list.findMany({
-        where: {
-          projectId,
-          project: {
-            userId: auth.userId
-          }
-        }
-      })
-
-      return c.json({ data }, 200)
-    }
-  )
-  .get("/:id",
-    zValidator("param", z.object({ id: z.string().optional() })),
-    async (c) => {
-      const auth = getAuth(c)
-      const id = c.req.param("id")
-
-      if (!id) {
-        return c.json({ message: "Missing ID" }, 400)
-      }
-
-      if (!auth?.userId) {
-        return c.json({ message: 'Unauthorized' }, 401)
-      }
-
-      const data = await prisma.list.findUnique({
-        where: {
-          id,
-          project: {
-            userId: auth.userId
-          }
-        }
-      })
-
-      if (!data) {
-        return c.json({ message: `The list with the ID ${id} was not found` }, 404)
-      }
-
-      return c.json({ data }, 200)
-    })
   .post("/",
     zValidator("json", listSchema),
     async (c) => {
