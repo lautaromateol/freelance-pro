@@ -67,6 +67,16 @@ const app = new Hono()
                 }
               }
             }
+          },
+          List: {
+            include: {
+              Task: {
+                select: {
+                  id: true,
+                  description: true 
+                }
+              }
+            }
           }
         }
       })
