@@ -6,6 +6,7 @@ import categories from "./categories"
 import clients from "./clients"
 import transactions from "./transactions"
 import projects from "./projects"
+import lists from "./lists"
 
 export const runtime = "edge"
 
@@ -17,6 +18,7 @@ const routes = app
   .route("/clients", clients)
   .route("/transactions", transactions)
   .route("/projects", projects)
+  .route("/lists", lists)
 
   export const GET = handle(app)
   export const POST = handle(app)
