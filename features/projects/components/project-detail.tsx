@@ -11,9 +11,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { DatePicker } from "@/components/date-picker"
 import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { columns } from "./project-transactions-columns"
 import { Badge } from "@/components/ui/badge"
+import { columns } from "./project-transactions-columns"
 import { BudgetComparisonChart } from "./budget-spent-comparison-chart"
+import { ListsContainer } from "./lists-container"
 
 type Project = InferResponseType<typeof client.api.projects[":id"]["$get"], 200>["data"]
 
@@ -31,6 +32,7 @@ type ProjectContextType = {
   releaseDate: Date | undefined
   setReleaseDate: React.Dispatch<React.SetStateAction<Date | undefined>>
   transactions: Project["Transaction"]
+  lists: Project["List"],
   isPending: boolean
   updateDate: () => void
   updateNotes: () => void
@@ -47,6 +49,7 @@ export function ProjectDetail({ project, children }: Props) {
   const [releaseDate, setReleaseDate] = useState(project.releaseDate ? new Date(project.releaseDate) : undefined)
 
   const transactions = project.Transaction ?? []
+  const lists = project.List ?? []
   const isPending = isDeletingTransactions || isEditingProject
 
   function updateNotes() {
@@ -75,7 +78,7 @@ export function ProjectDetail({ project, children }: Props) {
   }
 
   return (
-    <ProjectContext.Provider value={{ project, deleteTransactions, editProject, notes, setNotes, releaseDate, setReleaseDate, transactions, isPending, updateDate, updateNotes }}>
+    <ProjectContext.Provider value={{ project, deleteTransactions, editProject, notes, setNotes, releaseDate, setReleaseDate, transactions, lists, isPending, updateDate, updateNotes }}>
       {children}
     </ProjectContext.Provider>
   )
@@ -90,6 +93,7 @@ function Content() {
     releaseDate,
     setReleaseDate,
     transactions,
+    lists,
     isPending,
     updateDate,
     updateNotes,
@@ -99,7 +103,7 @@ function Content() {
   const spent = convertAmountFromMilliunits(transactions.filter((item) => item.amount < 0).reduce((acc, item) => item.amount + acc, 0)) * -1
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-hidden">
       <div className="w-1/2 lg:w-1/5 space-y-2">
         <div className="flex items-center gap-2">
           <Clock className="size-5 text-muted-foreground" />
@@ -189,6 +193,7 @@ function Content() {
           disabled={isPending}
         />
       </div>
+      <ListsContainer projectId={project.id} lists={lists} />
     </div>
   )
 }
