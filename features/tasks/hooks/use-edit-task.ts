@@ -26,7 +26,7 @@ export function useEditTask(id: string) {
       return data
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["project", { id: data.list.project.id }] })
+      queryClient.invalidateQueries({ queryKey: ["tasks", { projectId: data.list.project.id }] })
       toast.success("Task updated successfully.")
     },
     onError: (error) => toast.error(error.message) 
