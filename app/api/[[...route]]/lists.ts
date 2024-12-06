@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { clerkMiddleware, getAuth } from '@hono/clerk-auth'
 import { zValidator } from "@hono/zod-validator"
 import { prisma } from '@/lib/prisma'
-import { listSchema } from '@/schemas/list'
+import { listSchema, listToUpdate } from '@/schemas/list'
 
 const app = new Hono()
   .use('*', clerkMiddleware())
@@ -21,10 +21,23 @@ const app = new Hono()
         return c.json({ message: 'Unauthorized' }, 401)
       }
 
+      const dbList = await prisma.list.findFirst({
+        where: {
+          projectId
+        },
+        orderBy: {
+          order: "desc"
+        }
+      })
+
+      const order = dbList ? dbList.order + 1 : 1
+
+
       const data = await prisma.list.create({
         data: {
           name,
-          projectId
+          projectId,
+          order
         }
       })
 
@@ -32,7 +45,7 @@ const app = new Hono()
     }
   )
   .patch("/:id",
-    zValidator("json", listSchema),
+    zValidator("json", listToUpdate),
     zValidator("param", z.object({ id: z.string().optional() })),
     async (c) => {
       const auth = getAuth(c)
