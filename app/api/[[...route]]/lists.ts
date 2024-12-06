@@ -32,12 +32,35 @@ const app = new Hono()
 
       const order = dbList ? dbList.order + 1 : 1
 
-
       const data = await prisma.list.create({
         data: {
           name,
           projectId,
           order
+        }
+      })
+
+      return c.json({ data }, 200)
+    }
+  )
+  .get("/:projectId",
+    zValidator("param", z.object({
+      projectId: z.string()
+    })),
+    async (c) => {
+      const auth = getAuth(c)
+      const { projectId } = c.req.valid("param")
+
+      if (!auth?.userId) {
+        return c.json({ message: "Unauthorized" }, 401)
+      }
+
+      const data = await prisma.list.findMany({
+        where: {
+          project: {
+            userId: auth.userId
+          },
+          projectId
         }
       })
 
@@ -101,6 +124,36 @@ const app = new Hono()
 
       return c.json({ data }, 200)
 
+    })
+  .post("/update-orders",
+    zValidator("json", z.object({
+      lists: z.array(listToUpdate)
+    })),
+    async (c) => {
+      const auth = getAuth(c)
+      const { lists } = c.req.valid("json")
+
+      if (!auth?.userId) {
+        return c.json({ message: 'Unauthorized' }, 401)
+      }
+
+      const transaction = lists.map((list) => (
+        prisma.list.update({
+          where: {
+            id: list.id,
+            project: {
+              userId: auth.userId
+            }
+          },
+          data: {
+            order: list.order
+          }
+        })
+      ))
+
+      const data = await prisma.$transaction(transaction)
+
+      return c.json({ data })
     })
   .post("/bulk-delete",
     zValidator("json", z.object({
