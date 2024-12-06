@@ -25,7 +25,7 @@ export function useEditList(id?: string) {
     },
     onSuccess: (data) => {
       toast.success("List updated successfully.")
-      queryClient.invalidateQueries({ queryKey: ["project", { id: data.projectId }] })
+      queryClient.invalidateQueries({ queryKey: ["lists", { projectId: data.projectId }] })
     },
     onError: (error) => toast.error(error.message)
   })

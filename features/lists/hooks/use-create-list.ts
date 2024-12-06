@@ -24,7 +24,7 @@ export function useCreateList() {
     },
     onSuccess: (data) => {
       toast.success("List created successfully.")
-      queryClient.invalidateQueries({ queryKey: ["project", { id: data.projectId }] })
+      queryClient.invalidateQueries({ queryKey: ["lists", { projectId: data.projectId }] })
     },
     onError: (error) => toast.error(error.message)
   })

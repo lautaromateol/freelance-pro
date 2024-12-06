@@ -26,7 +26,7 @@ export function useDeleteLists() {
     onSuccess: (projectId) => {
       toast.success("Lists deleted successfully.")
       if(projectId) {
-        queryClient.invalidateQueries({ queryKey: ["project", { id: projectId.projectId }] })
+        queryClient.invalidateQueries({ queryKey: ["lists", { projectId: projectId.projectId }] })
       }
     },
     onError: (error) => toast.error(error.message)
