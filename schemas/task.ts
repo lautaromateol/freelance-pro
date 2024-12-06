@@ -6,7 +6,8 @@ export const taskSchema = z.object({
 })
 
 export const taskUpdateSchema = z.object({
+  id: z.string(),
   description: z.string().optional(),
+  order: z.number().optional(),
   listId: z.string().optional(),
-  order: z.number().optional()
 })
