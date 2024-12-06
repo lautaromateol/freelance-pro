@@ -74,6 +74,9 @@ const app = new Hono()
                 select: {
                   id: true,
                   description: true 
+                },
+                orderBy: {
+                  order: "asc"
                 }
               }
             }
