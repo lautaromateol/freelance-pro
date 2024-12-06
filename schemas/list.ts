@@ -6,6 +6,7 @@ export const listSchema = z.object({
 })
 
 export const listToUpdate = z.object({
+  id: z.string(),
   name: z.string().optional(),
   order: z.number().optional()
 })
