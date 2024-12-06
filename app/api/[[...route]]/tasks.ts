@@ -49,15 +49,41 @@ const app = new Hono()
       return c.json({ data }, 200)
     }
   )
+  .get("/:projectId",
+    zValidator("param", z.object({
+      projectId: z.string()
+    })),
+    async (c) => {
+      const auth = getAuth(c)
+      const { projectId } = c.req.valid("param")
+
+      if (!auth?.userId) {
+        return c.json({ message: "Unauthorized" }, 401)
+      }
+
+      const data = await prisma.task.findMany({
+        where: {
+          list: {
+            project: {
+              id: projectId,
+              userId: auth.userId
+            }
+          },
+        }
+      })
+
+      return c.json({ data }, 200)
+    }
+  )
   .patch("/:id",
     zValidator("param", z.object({ id: z.string() })),
     zValidator("json", taskUpdateSchema),
-    async(c) => {
+    async (c) => {
       const auth = getAuth(c)
       const { id } = c.req.valid("param")
       const values = c.req.valid("json")
 
-      if(!id) {
+      if (!id) {
         return c.json({ message: "Missing ID" }, 400)
       }
 
@@ -91,13 +117,13 @@ const app = new Hono()
       return c.json({ data }, 200)
     }
   )
-  .delete("/:id", 
+  .delete("/:id",
     zValidator("param", z.object({ id: z.string() })),
-    async(c) => {
+    async (c) => {
       const auth = getAuth(c)
       const { id } = c.req.valid("param")
 
-      if(!id) {
+      if (!id) {
         return c.json({ message: "Missing ID" }, 400)
       }
 
@@ -125,10 +151,49 @@ const app = new Hono()
             }
           }
         }
-      }) 
+      })
 
       return c.json({ data }, 200)
     }
   )
+  .post("/update-orders",
+    zValidator("json", z.object({
+      tasks: z.array(taskUpdateSchema)
+    })),
+    async (c) => {
+      const auth = getAuth(c)
+      const { tasks } = c.req.valid("json")
+
+      if (!auth?.userId) {
+        return c.json({ message: 'Unauthorized' }, 401)
+      }
+
+      const transaction = tasks.map((task) => (
+        prisma.task.update({
+          where: {
+            id: task.id,
+            list: {
+              project: {
+                userId: auth.userId
+              }
+            }
+          },
+          data: {
+            order: task.order
+          },
+          include: {
+            list: {
+              select: {
+                projectId: true
+              }
+            }
+          }
+        })
+      ))
+
+      const data = await prisma.$transaction(transaction)
+
+      return c.json({ data })
+    })
 
 export default app
