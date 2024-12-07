@@ -4,22 +4,20 @@ import { useForm } from "react-hook-form"
 import { Trash } from "lucide-react"
 import { InferResponseType } from "hono"
 import { z } from "zod"
+import { useOnClickOutside } from "usehooks-ts"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useEditTask } from "@/features/tasks/hooks/use-edit-task"
 import { useDeleteTask } from "@/features/tasks/hooks/use-delete-task"
+import { taskUpdateSchema } from "@/schemas/task"
 import { client } from "@/lib/client"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
-import { taskUpdateSchema } from "@/schemas/task"
 import { Input } from "@/components/ui/input"
-import { useOnClickOutside } from "usehooks-ts"
 
-type Project = InferResponseType<typeof client.api.projects[":id"]["$get"], 200>["data"]
-
-type List = Project["List"][0]
+type Task = InferResponseType<typeof client.api.tasks[":projectId"]["$get"], 200>["data"][0]
 
 type Props = {
-  task: List["Task"][0]
+  task: Task
 }
 
 export function TaskCard({ task }: Props) {
@@ -56,7 +54,7 @@ export function TaskCard({ task }: Props) {
     setIsEditSession(false)
   }))
 
-  function onSubmit(data: z.infer<typeof taskUpdateSchema>) {
+  function onSubmit(data: Omit<z.infer<typeof taskUpdateSchema>, "id">) {
     const original = optimisticTask.description
     setOptimisticTask(data.description!)
 
@@ -67,7 +65,7 @@ export function TaskCard({ task }: Props) {
         setIsEditSession(false)
         formRef.current?.reset()
       },
-      onError:  () => setOptimisticTask(original)
+      onError: () => setOptimisticTask(original)
     })
   }
 
@@ -97,7 +95,8 @@ export function TaskCard({ task }: Props) {
   }
 
   return (
-    <div className="flex items-center justify-between bg-neutral-100/60 hover:bg-neutral-100 p-2 rounded-md">
+    <div className="flex items-center justify-between bg-neutral-100/60 hover:bg-neutral-100 p-2 rounded-md min-h-12"
+    >
       <p onClick={() => setIsEditSession(true)} className="text-black/80 font-light hover:underline cursor-pointer">
         {optimisticTask.description}
       </p>
