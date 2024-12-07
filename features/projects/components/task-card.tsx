@@ -6,7 +6,7 @@ import { InferResponseType } from "hono"
 import { z } from "zod"
 import { useOnClickOutside } from "usehooks-ts"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { sortableKeyboardCoordinates, useSortable } from "@dnd-kit/sortable"
+import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { useEditTask } from "@/features/tasks/hooks/use-edit-task"
 import { useDeleteTask } from "@/features/tasks/hooks/use-delete-task"
@@ -15,7 +15,6 @@ import { client } from "@/lib/client"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core"
 
 type Tasks = InferResponseType<typeof client.api.tasks[":projectId"]["$get"], 200>["data"]
 type Task = Tasks[0]
@@ -36,22 +35,6 @@ export function TaskCard({ tasks, task, setOptimisticTasks }: Props) {
   const { editTask, isPending: isEditingTask } = useEditTask(task.id)
   const { deleteTask, isPending: isDeletingTask } = useDeleteTask(task.id)
 
-  const sensors = useSensors(
-    useSensor(MouseSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 100,
-        tolerance: 6,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-  );
 
   const { setNodeRef, attributes, listeners, transition, transform, isDragging } = useSortable({
     id: task.id,
@@ -61,7 +44,6 @@ export function TaskCard({ tasks, task, setOptimisticTasks }: Props) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    sensors
   }
 
   const form = useForm({
