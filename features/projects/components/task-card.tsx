@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ElementRef, useRef, useState, useOptimistic } from "react"
+import { Dispatch, ElementRef, SetStateAction, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Trash } from "lucide-react"
 import { InferResponseType } from "hono"
 import { z } from "zod"
 import { useOnClickOutside } from "usehooks-ts"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { sortableKeyboardCoordinates, useSortable } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 import { useEditTask } from "@/features/tasks/hooks/use-edit-task"
 import { useDeleteTask } from "@/features/tasks/hooks/use-delete-task"
 import { taskUpdateSchema } from "@/schemas/task"
@@ -13,20 +15,57 @@ import { client } from "@/lib/client"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core"
 
-type Task = InferResponseType<typeof client.api.tasks[":projectId"]["$get"], 200>["data"][0]
+type Tasks = InferResponseType<typeof client.api.tasks[":projectId"]["$get"], 200>["data"]
+type Task = Tasks[0]
 
 type Props = {
-  task: Task
+  tasks: Tasks
+  task: Task,
+  setOptimisticTasks: Dispatch<SetStateAction<{
+    id: string;
+    order: number;
+    description: string;
+    listId: string;
+  }[]>>
 }
 
-export function TaskCard({ task }: Props) {
+export function TaskCard({ tasks, task, setOptimisticTasks }: Props) {
 
   const { editTask, isPending: isEditingTask } = useEditTask(task.id)
   const { deleteTask, isPending: isDeletingTask } = useDeleteTask(task.id)
 
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 100,
+        tolerance: 6,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const { setNodeRef, attributes, listeners, transition, transform, isDragging } = useSortable({
+    id: task.id,
+    data: { type: "Task", task }
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    sensors
+  }
+
   const form = useForm({
-    resolver: zodResolver(taskUpdateSchema),
+    resolver: zodResolver(taskUpdateSchema.omit({ id: true })),
     defaultValues: {
       description: task.description
     }
@@ -34,13 +73,14 @@ export function TaskCard({ task }: Props) {
 
   const formRef = useRef<ElementRef<"form">>(null)
 
-  const [optimisticTask, setOptimisticTask] = useOptimistic(task, (state, description: string) => ({
-    ...state,
-    description,
-  }))
   const [isEditSession, setIsEditSession] = useState(false)
 
   const isPending = isDeletingTask || isEditingTask
+
+  useOnClickOutside(formRef, (() => {
+    form.reset()
+    setIsEditSession(false)
+  }))
 
   function onInputKeydown(e: any) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -49,28 +89,30 @@ export function TaskCard({ task }: Props) {
     }
   }
 
-  useOnClickOutside(formRef, (() => {
-    formRef.current?.reset()
-    setIsEditSession(false)
-  }))
-
   function onSubmit(data: Omit<z.infer<typeof taskUpdateSchema>, "id">) {
-    const original = optimisticTask.description
-    setOptimisticTask(data.description!)
-
+    setOptimisticTasks((tasks) => tasks.map((item) => task.id === item.id ? { ...item, description: data.description! } : item))
     editTask({
       description: data.description
     }, {
       onSuccess: () => {
         setIsEditSession(false)
-        formRef.current?.reset()
       },
-      onError: () => setOptimisticTask(original)
+      onError: () => setOptimisticTasks(tasks)
     })
   }
 
   function onDeleteTask() {
     deleteTask()
+  }
+
+  if (isDragging) {
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className="bg-neutral-100/60 hover:bg-neutral-100 p-2 rounded-md min-h-12 border"
+    />
   }
 
   if (isEditSession) {
@@ -95,13 +137,25 @@ export function TaskCard({ task }: Props) {
   }
 
   return (
-    <div className="flex items-center justify-between bg-neutral-100/60 hover:bg-neutral-100 p-2 rounded-md min-h-12"
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className="flex items-center justify-between bg-neutral-100/60 hover:bg-neutral-100 p-2 rounded-md min-h-12"
     >
-      <p onClick={() => setIsEditSession(true)} className="text-black/80 font-light hover:underline cursor-pointer">
-        {optimisticTask.description}
-      </p>
+      <div
+        className="flex-1"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={() => setIsEditSession(true)}
+      >
+        <p className="text-black/80 font-light hover:underline cursor-pointer">
+          {task.description}
+        </p>
+      </div>
       <Button
         disabled={isPending}
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={onDeleteTask}
         variant="ghost"
         size="xs"
