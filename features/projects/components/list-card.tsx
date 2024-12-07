@@ -1,5 +1,6 @@
+import { Dispatch, SetStateAction, useMemo } from "react"
 import { InferResponseType } from "hono"
-import { useSortable } from "@dnd-kit/sortable"
+import { SortableContext, useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { client } from "@/lib/client"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,10 +12,18 @@ type Tasks = InferResponseType<typeof client.api.tasks[":projectId"]["$get"], 20
 
 type Props = {
   list: List,
-  tasks: Tasks
+  tasks: Tasks,
+  setOptimisticTasks: Dispatch<SetStateAction<{
+    id: string;
+    order: number;
+    description: string;
+    listId: string;
+  }[]>>
 }
 
-export function ListCard({ list, tasks }: Props) {
+export function ListCard({ list, tasks, setOptimisticTasks }: Props) {
+
+  const tasksIds = useMemo(() => tasks.map((task) => task.id), [tasks])
 
   const { setNodeRef, attributes, listeners, transition, transform, isDragging } = useSortable({
     id: list.id,
@@ -55,9 +64,16 @@ export function ListCard({ list, tasks }: Props) {
         {tasks.length > 0 && (
           <CardContent className="p-2">
             <div className="space-y-1">
+              <SortableContext items={tasksIds}>
                 {tasks.map((task) => (
-                  <TaskCard key={task.id} task={task} />
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    tasks={tasks}
+                    setOptimisticTasks={setOptimisticTasks}
+                  />
                 ))}
+              </SortableContext>
             </div>
           </CardContent>
         )}
