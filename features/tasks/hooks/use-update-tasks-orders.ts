@@ -24,7 +24,7 @@ export function useUpdateTasksOrders() {
       return data
     },
     onSuccess: (data) => {
-      toast.success("List moved successfully.")
+      toast.success("Task moved successfully.")
       queryClient.invalidateQueries({ queryKey: ["tasks", { projectId: data[0].list.projectId }] })
     },
     onError: (error) => toast.error(error.message)
