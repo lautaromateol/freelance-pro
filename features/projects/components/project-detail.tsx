@@ -32,7 +32,6 @@ type ProjectContextType = {
   releaseDate: Date | undefined
   setReleaseDate: React.Dispatch<React.SetStateAction<Date | undefined>>
   transactions: Project["Transaction"]
-  lists: Project["List"],
   isPending: boolean
   updateDate: () => void
   updateNotes: () => void
@@ -49,7 +48,6 @@ export function ProjectDetail({ project, children }: Props) {
   const [releaseDate, setReleaseDate] = useState(project.releaseDate ? new Date(project.releaseDate) : undefined)
 
   const transactions = project.Transaction ?? []
-  const lists = project.List ?? []
   const isPending = isDeletingTransactions || isEditingProject
 
   function updateNotes() {
@@ -78,7 +76,7 @@ export function ProjectDetail({ project, children }: Props) {
   }
 
   return (
-    <ProjectContext.Provider value={{ project, deleteTransactions, editProject, notes, setNotes, releaseDate, setReleaseDate, transactions, lists, isPending, updateDate, updateNotes }}>
+    <ProjectContext.Provider value={{ project, deleteTransactions, editProject, notes, setNotes, releaseDate, setReleaseDate, transactions, isPending, updateDate, updateNotes }}>
       {children}
     </ProjectContext.Provider>
   )
@@ -93,7 +91,6 @@ function Content() {
     releaseDate,
     setReleaseDate,
     transactions,
-    lists,
     isPending,
     updateDate,
     updateNotes,
@@ -193,7 +190,7 @@ function Content() {
           disabled={isPending}
         />
       </div>
-      <ListsContainer projectId={project.id} lists={lists} />
+      <ListsContainer projectId={project.id} />
     </div>
   )
 }
