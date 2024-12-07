@@ -5,15 +5,18 @@ import { ListTodo } from "lucide-react"
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from "@dnd-kit/core"
 import { arrayMove, SortableContext } from "@dnd-kit/sortable"
 import { useUpdateOrders } from "@/features/lists/hooks/use-update-orders";
-import { client } from "@/lib/client";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { ListCard } from "./list-card";
-import { AddListButton } from "./add-list-button";
+import { useUpdateTasksOrders } from "@/features/tasks/hooks/use-update-tasks-orders";
 import { useGetLists } from "@/features/lists/hooks/use-get-lists";
 import { useGetTasks } from "@/features/tasks/hooks/use-get-tasks";
+import { client } from "@/lib/client";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AddListButton } from "./add-list-button";
+import { ListCard } from "./list-card";
+import { TaskCard } from "./task-card";
 
 type List = InferResponseType<typeof client.api.lists[":projectId"]["$get"], 200>["data"][0]
+type Task = InferResponseType<typeof client.api.tasks[":projectId"]["$get"], 200>["data"][0]
 
 type Props = {
   projectId: string
@@ -28,56 +31,128 @@ export function ListsContainer({ projectId }: Props) {
   const tasks = useMemo(() => tasksQuery.data ?? [], [tasksQuery.data])
 
   const sortedLists = useMemo(() => lists.sort((a, b) => a.order - b.order), [lists])
+  const sortedTasks = useMemo(() => tasks.sort((a, b) => a.order - b.order), [tasks])
   const listsIds = useMemo(() => lists.map((list) => list.id), [lists])
 
   const [optimisticLists, setOptimisticLists] = useState(sortedLists)
-  const [activeList, setActiveList] = useState<List | null>(null)
+  const [optimisticTasks, setOptimisticTasks] = useState(sortedTasks)
 
-  const { updateOrders, isPending } = useUpdateOrders()
+  const [activeList, setActiveList] = useState<List | null>(null)
+  const [activeTask, setActiveTask] = useState<Task | null>(null)
+
+  const { updateOrders, isPending: isUpdatingListsOrders } = useUpdateOrders()
+  const { updateTasksOrders, isPending: isUpdatingTaskOrders } = useUpdateTasksOrders()
+
+  const isPending = isUpdatingTaskOrders || isUpdatingListsOrders
 
   function onDragStart(event: DragStartEvent) {
     if (event.active.data.current?.type === "List") {
       setActiveList(event.active.data.current.list)
     }
+    if (event.active.data.current?.type === "Task") {
+      setActiveTask(event.active.data.current.task)
+    }
   }
 
   function onDragEnd(event: DragEndEvent) {
-    // setActiveTask(null)
+    setActiveTask(null)
     setActiveList(null)
+
     const { active, over } = event
 
     if (!over) {
       return
     }
 
-    const activeListId = active.id
-    const overListId = over.id
+    const isActiveATask = active.data.current?.type === "Task"
+    const isOverATask = over.data.current?.type === "Task"
+    const isOverAColumn = over.data.current?.type === "Column"
 
-    if (activeListId === overListId) {
+    const activeId = active.id
+    const overId = over.id
+
+    if (activeId === overId) {
       return
     }
 
-    const activeListIndex = sortedLists.findIndex((list) => list.id === activeListId)
-    const overListIndex = sortedLists.findIndex((list) => list.id === overListId)
+    // Reordenar tareas dentro de la misma columna
+    if (isActiveATask && isOverATask) {
+      setOptimisticTasks((tasks) => {
+        const activeTaskIndex = tasks.findIndex((task) => task.id === activeId)
+        const overTaskIndex = tasks.findIndex((task) => task.id === overId)
 
-    if (activeListIndex === -1 || overListIndex === -1) {
-      return
+        // Solo reordenar si los índices son diferentes
+        if (activeTaskIndex !== overTaskIndex) {
+          // Cambiar listId de la tarea activa a la de la tarea sobre la que se arrastra
+          tasks[activeTaskIndex].listId = tasks[overTaskIndex].listId
+          // Usar arrayMove para generar una copia reordenada de las tareas
+          const reorderedTasks = arrayMove(tasks, activeTaskIndex, overTaskIndex)
+            .map((item, index) => ({ ...item, order: index + 1 })) // Actualizar el orden
+            .sort((a, b) => a.order - b.order) // Ordenar por el campo order
+
+          const reorderedTasksFiltered = reorderedTasks.map((item) => ({
+            id: item.id,
+            order: item.order,
+            listId: item.listId
+          }))
+          onUpdateTasksOrders(reorderedTasksFiltered)
+          return reorderedTasks // Retornar la nueva lista de tareas reordenadas
+        }
+
+        return tasks // Si no hay cambios en los índices, retornar el array original
+      })
     }
+    // Mover tarea a otra columna
+    else if (isActiveATask && isOverAColumn) {
+      setOptimisticTasks((tasks) => {
+        const activeTaskIndex = tasks.findIndex((task) => task.id === activeId)
 
-    const reorderedLists = arrayMove(sortedLists, activeListIndex, overListIndex).map((item, index) => ({ ...item, order: index + 1 })).sort((a, b) => a.order - b.order)
+        if (activeTaskIndex !== -1) {
+          // Actualizar el listId de la tarea para moverla a la nueva columna
+          tasks[activeTaskIndex].listId = overId as string
+          // No necesitamos reordenar el array aquí si solo movemos la tarea
+          const reorderedTasks = tasks
+            .map((item, index) => ({ ...item, order: index + 1 })) // Asignar el nuevo order
+            .sort((a, b) => a.order - b.order)
 
-    setOptimisticLists(reorderedLists)
+          const reorderedTasksFiltered = reorderedTasks.map((item) => ({
+            id: item.id,
+            order: item.order,
+            listId: item.listId
+          }))
+          onUpdateTasksOrders(reorderedTasksFiltered)
+          return reorderedTasks // Retornar las tareas con la nueva asignación de listId
+        }
 
-    const reorderedListsFiltered = reorderedLists
-      .map((list) => ({
+        return tasks
+      })
+    }
+    // Reordenar columnas
+    else {
+      const activeListIndex = sortedLists.findIndex((list) => list.id === activeId)
+      const overListIndex = sortedLists.findIndex((list) => list.id === overId)
+
+      if (activeListIndex === -1 || overListIndex === -1) {
+        return
+      }
+
+      // Usar arrayMove para reordenar las columnas
+      const reorderedLists = arrayMove(sortedLists, activeListIndex, overListIndex)
+        .map((item, index) => ({ ...item, order: index + 1 })) // Asignar el nuevo order a las columnas
+        .sort((a, b) => a.order - b.order)
+
+      setOptimisticLists(reorderedLists)
+
+      const reorderedListsFiltered = reorderedLists.map((list) => ({
         id: list.id,
         order: list.order
       }))
 
-    onUpdateOrders(reorderedListsFiltered)
+      onUpdateListsOrders(reorderedListsFiltered)
+    }
   }
 
-  function onUpdateOrders(
+  function onUpdateListsOrders(
     lists: {
       id: string;
       order: number;
@@ -87,9 +162,22 @@ export function ListsContainer({ projectId }: Props) {
     })
   }
 
+  function onUpdateTasksOrders(
+    tasks: {
+      id: string;
+      order: number;
+      listId: string;
+    }[]) {
+    if (isPending) return
+    updateTasksOrders({ tasks }, {
+      onError: () => setOptimisticTasks(sortedTasks)
+    })
+  }
+
   useEffect(() => {
     setOptimisticLists(sortedLists)
-  }, [sortedLists])
+    setOptimisticTasks(sortedTasks)
+  }, [sortedLists, sortedTasks])
 
 
   if (listsQuery.isLoading || tasksQuery.isLoading) {
@@ -114,12 +202,17 @@ export function ListsContainer({ projectId }: Props) {
         <ListTodo className="h-5 w-5 text-muted-foreground" />
         <h3 className="font-semibold">Project Tasks</h3>
       </div>
-      <ScrollArea className="h-[200px] w-full">
+      <ScrollArea className="min-h-[400px] w-full">
         <DndContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
           <div className="flex items-start gap-x-2">
             <SortableContext disabled={isPending} items={listsIds}>
               {optimisticLists.map((list) => (
-                <ListCard key={list.id} list={list} tasks={tasks.filter((task) => task.listId === list.id)} />
+                <ListCard
+                  key={list.id}
+                  list={list}
+                  tasks={optimisticTasks.filter((task) => task.listId === list.id)}
+                  setOptimisticTasks={setOptimisticTasks}
+                />
               ))}
             </SortableContext>
             <AddListButton projectId={projectId} />
@@ -128,7 +221,14 @@ export function ListsContainer({ projectId }: Props) {
           {createPortal(
             <DragOverlay>
               {activeList && (
-                <ListCard list={activeList} tasks={tasks.filter((task) => task.listId === activeList.id)} />
+                <ListCard
+                  list={activeList}
+                  tasks={optimisticTasks.filter((task) => task.listId === activeList.id)}
+                  setOptimisticTasks={setOptimisticTasks}
+                />
+              )}
+              {activeTask && (
+                <TaskCard task={activeTask} tasks={tasks} setOptimisticTasks={setOptimisticTasks} />
               )}
             </DragOverlay>,
             document.body
