@@ -34,7 +34,7 @@ export function AddListButton({ projectId }: Props) {
   const { createList, isPending } = useCreateList()
 
   useOnClickOutside(formRef, (() => {
-    formRef.current?.reset()
+    form.reset()
     setEditSession(false)
   }))
 
@@ -47,7 +47,10 @@ export function AddListButton({ projectId }: Props) {
 
   function handleSubmit(data: FormValues) {
     createList(data, {
-      onSuccess: () => setEditSession(false)
+      onSuccess: () => {
+        form.reset()
+        setEditSession(false)
+      }
     })
   }
 

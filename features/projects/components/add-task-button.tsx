@@ -34,7 +34,7 @@ export function AddTaskButton({ listId }: Props) {
   const { createTask, isPending } = useCreateTask()
 
   useOnClickOutside(formRef, (() => {
-    formRef.current?.reset()
+    form.reset()
     setEditSession(false)
   }))
 
@@ -48,7 +48,7 @@ export function AddTaskButton({ listId }: Props) {
   function handleSubmit(data: FormValues) {
     createTask(data, {
       onSuccess: () => {
-        formRef.current?.reset()
+        form.reset()
         setEditSession(false)
       }
     })
