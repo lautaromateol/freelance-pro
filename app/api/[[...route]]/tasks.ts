@@ -180,7 +180,8 @@ const app = new Hono()
             }
           },
           data: {
-            order: task.order
+            order: task.order,
+            listId: task.listId
           },
           include: {
             list: {
@@ -194,7 +195,7 @@ const app = new Hono()
 
       const data = await prisma.$transaction(transaction)
 
-      return c.json({ data })
+      return c.json({ data }, 200)
     })
 
 export default app
