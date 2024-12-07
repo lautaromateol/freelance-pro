@@ -50,6 +50,7 @@ const app = new Hono()
     }
   )
   .get("/:projectId",
+
     zValidator("param", z.object({
       projectId: z.string()
     })),
@@ -77,7 +78,7 @@ const app = new Hono()
   )
   .patch("/:id",
     zValidator("param", z.object({ id: z.string() })),
-    zValidator("json", taskUpdateSchema),
+    zValidator("json", taskUpdateSchema.omit({ id: true })),
     async (c) => {
       const auth = getAuth(c)
       const { id } = c.req.valid("param")
