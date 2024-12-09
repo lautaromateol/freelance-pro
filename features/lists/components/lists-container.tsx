@@ -4,16 +4,16 @@ import { InferResponseType } from "hono";
 import { ListTodo } from "lucide-react"
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from "@dnd-kit/core"
 import { arrayMove, SortableContext } from "@dnd-kit/sortable"
-import { useUpdateOrders } from "@/features/lists/hooks/use-update-orders";
-import { useUpdateTasksOrders } from "@/features/tasks/hooks/use-update-tasks-orders";
 import { useGetLists } from "@/features/lists/hooks/use-get-lists";
+import { useUpdateOrders } from "@/features/lists/hooks/use-update-orders";
 import { useGetTasks } from "@/features/tasks/hooks/use-get-tasks";
+import { useUpdateTasksOrders } from "@/features/tasks/hooks/use-update-tasks-orders";
+import { AddListButton } from "@/features/lists/components/add-list-button";
+import { ListCard } from "@/features/lists/components/list-card";
+import { TaskCard } from "@/features/tasks/components/task-card";
 import { client } from "@/lib/client";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AddListButton } from "./add-list-button";
-import { ListCard } from "./list-card";
-import { TaskCard } from "./task-card";
 
 type List = InferResponseType<typeof client.api.lists[":projectId"]["$get"], 200>["data"][0]
 type Task = InferResponseType<typeof client.api.tasks[":projectId"]["$get"], 200>["data"][0]

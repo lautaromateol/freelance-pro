@@ -3,9 +3,10 @@ import { InferResponseType } from "hono"
 import { SortableContext, useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { client } from "@/lib/client"
+import { TaskCard } from "@/features/tasks/components/task-card"
+import { AddTaskButton } from "@/features/tasks/components/add-task-button"
+import { ListDropdown } from "@/features/lists/components/list-dropdown"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { TaskCard } from "./task-card"
-import { AddTaskButton } from "./add-task-button"
 
 type List = InferResponseType<typeof client.api.lists[":projectId"]["$get"], 200>["data"][0]
 type Tasks = InferResponseType<typeof client.api.tasks[":projectId"]["$get"], 200>["data"]
@@ -55,11 +56,12 @@ export function ListCard({ list, tasks, setOptimisticTasks }: Props) {
         <CardHeader
           {...listeners}
           {...attributes}
-          className="-my-4 -mx-2"
+          className="flex items-center justify-between -my-4 -mx-2"
         >
           <CardTitle>
             <p className="text-sm">{list.name}</p>
           </CardTitle>
+          <ListDropdown />
         </CardHeader>
         {tasks.length > 0 && (
           <CardContent className="p-2">
