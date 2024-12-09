@@ -9,6 +9,8 @@ export const listSchema = z.object({
 
 export const listToUpdate = z.object({
   id: z.string(),
-  name: z.string().optional(),
+  name: z.string().optional().refine(val => val !== '', {
+    message: 'Insert a name.'
+  }),
   order: z.number().optional()
 })

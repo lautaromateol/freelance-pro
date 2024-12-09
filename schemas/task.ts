@@ -9,7 +9,9 @@ export const taskSchema = z.object({
 
 export const taskUpdateSchema = z.object({
   id: z.string(),
-  description: z.string().optional(),
+  description: z.string().optional().refine(val => val !== '', {
+    message: 'Insert a description.'
+  }),
   order: z.number().optional(),
   listId: z.string().optional(),
 })
