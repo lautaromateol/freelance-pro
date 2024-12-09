@@ -75,44 +75,15 @@ export function ListsContainer({ projectId }: Props) {
       return
     }
 
-    // Reordenar tareas dentro de la misma columna
     if (isActiveATask && isOverATask) {
       setOptimisticTasks((tasks) => {
         const activeTaskIndex = tasks.findIndex((task) => task.id === activeId)
         const overTaskIndex = tasks.findIndex((task) => task.id === overId)
 
-        // Solo reordenar si los índices son diferentes
         if (activeTaskIndex !== overTaskIndex) {
-          // Cambiar listId de la tarea activa a la de la tarea sobre la que se arrastra
           tasks[activeTaskIndex].listId = tasks[overTaskIndex].listId
-          // Usar arrayMove para generar una copia reordenada de las tareas
           const reorderedTasks = arrayMove(tasks, activeTaskIndex, overTaskIndex)
-            .map((item, index) => ({ ...item, order: index + 1 })) // Actualizar el orden
-            .sort((a, b) => a.order - b.order) // Ordenar por el campo order
-
-          const reorderedTasksFiltered = reorderedTasks.map((item) => ({
-            id: item.id,
-            order: item.order,
-            listId: item.listId
-          }))
-          onUpdateTasksOrders(reorderedTasksFiltered)
-          return reorderedTasks // Retornar la nueva lista de tareas reordenadas
-        }
-
-        return tasks // Si no hay cambios en los índices, retornar el array original
-      })
-    }
-    // Mover tarea a otra columna
-    else if (isActiveATask && isOverAColumn) {
-      setOptimisticTasks((tasks) => {
-        const activeTaskIndex = tasks.findIndex((task) => task.id === activeId)
-
-        if (activeTaskIndex !== -1) {
-          // Actualizar el listId de la tarea para moverla a la nueva columna
-          tasks[activeTaskIndex].listId = overId as string
-          // No necesitamos reordenar el array aquí si solo movemos la tarea
-          const reorderedTasks = tasks
-            .map((item, index) => ({ ...item, order: index + 1 })) // Asignar el nuevo order
+            .map((item, index) => ({ ...item, order: index + 1 }))
             .sort((a, b) => a.order - b.order)
 
           const reorderedTasksFiltered = reorderedTasks.map((item) => ({
@@ -121,13 +92,34 @@ export function ListsContainer({ projectId }: Props) {
             listId: item.listId
           }))
           onUpdateTasksOrders(reorderedTasksFiltered)
-          return reorderedTasks // Retornar las tareas con la nueva asignación de listId
+          return reorderedTasks
         }
 
         return tasks
       })
     }
-    // Reordenar columnas
+    else if (isActiveATask && isOverAColumn) {
+      setOptimisticTasks((tasks) => {
+        const activeTaskIndex = tasks.findIndex((task) => task.id === activeId)
+
+        if (activeTaskIndex !== -1) {
+          tasks[activeTaskIndex].listId = overId as string
+          const reorderedTasks = tasks
+            .map((item, index) => ({ ...item, order: index + 1 }))
+            .sort((a, b) => a.order - b.order)
+
+          const reorderedTasksFiltered = reorderedTasks.map((item) => ({
+            id: item.id,
+            order: item.order,
+            listId: item.listId
+          }))
+          onUpdateTasksOrders(reorderedTasksFiltered)
+          return reorderedTasks
+        }
+
+        return tasks
+      })
+    }
     else {
       const activeListIndex = sortedLists.findIndex((list) => list.id === activeId)
       const overListIndex = sortedLists.findIndex((list) => list.id === overId)
@@ -136,9 +128,8 @@ export function ListsContainer({ projectId }: Props) {
         return
       }
 
-      // Usar arrayMove para reordenar las columnas
       const reorderedLists = arrayMove(sortedLists, activeListIndex, overListIndex)
-        .map((item, index) => ({ ...item, order: index + 1 })) // Asignar el nuevo order a las columnas
+        .map((item, index) => ({ ...item, order: index + 1 }))
         .sort((a, b) => a.order - b.order)
 
       setOptimisticLists(reorderedLists)
@@ -209,8 +200,10 @@ export function ListsContainer({ projectId }: Props) {
               {optimisticLists.map((list) => (
                 <ListCard
                   key={list.id}
-                  list={list}
+                  lists={optimisticLists}
                   tasks={optimisticTasks.filter((task) => task.listId === list.id)}
+                  list={list}
+                  setOptimisticLists={setOptimisticLists}
                   setOptimisticTasks={setOptimisticTasks}
                 />
               ))}
@@ -222,8 +215,10 @@ export function ListsContainer({ projectId }: Props) {
             <DragOverlay>
               {activeList && (
                 <ListCard
-                  list={activeList}
+                  lists={optimisticLists}
                   tasks={optimisticTasks.filter((task) => task.listId === activeList.id)}
+                  list={activeList}
+                  setOptimisticLists={setOptimisticLists}
                   setOptimisticTasks={setOptimisticTasks}
                 />
               )}
