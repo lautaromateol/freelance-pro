@@ -22,12 +22,7 @@ type Task = Tasks[0]
 type Props = {
   tasks: Tasks
   task: Task,
-  setOptimisticTasks: Dispatch<SetStateAction<{
-    id: string;
-    order: number;
-    description: string;
-    listId: string;
-  }[]>>
+  setOptimisticTasks: Dispatch<SetStateAction<Tasks>>
 }
 
 export function TaskCard({ tasks, task, setOptimisticTasks }: Props) {
@@ -59,10 +54,12 @@ export function TaskCard({ tasks, task, setOptimisticTasks }: Props) {
 
   const isPending = isDeletingTask || isEditingTask
 
-  useOnClickOutside(formRef, (() => {
+  function onClose() {
     form.reset()
     setIsEditSession(false)
-  }))
+  }
+
+  useOnClickOutside(formRef, onClose)
 
   function onInputKeydown(e: any) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -72,6 +69,7 @@ export function TaskCard({ tasks, task, setOptimisticTasks }: Props) {
   }
 
   function onSubmit(data: Omit<z.infer<typeof taskUpdateSchema>, "id">) {
+    const oldTasks = [...tasks]
     setOptimisticTasks((tasks) => tasks.map((item) => task.id === item.id ? { ...item, description: data.description! } : item))
     editTask({
       description: data.description
@@ -79,7 +77,7 @@ export function TaskCard({ tasks, task, setOptimisticTasks }: Props) {
       onSuccess: () => {
         setIsEditSession(false)
       },
-      onError: () => setOptimisticTasks(tasks)
+      onError: () => setOptimisticTasks(oldTasks)
     })
   }
 
