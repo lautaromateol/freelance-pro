@@ -1,30 +1,99 @@
-import { Dispatch, SetStateAction, useMemo } from "react"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Dispatch, ElementRef, SetStateAction, useMemo, useRef, useState } from "react"
+import { useForm } from "react-hook-form"
 import { InferResponseType } from "hono"
+import { z } from "zod"
+import { useOnClickOutside } from "usehooks-ts"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { SortableContext, useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { client } from "@/lib/client"
+import { listToUpdate } from "@/schemas/list"
+import { useEditList } from "@/features/lists/hooks/use-edit-list"
+import { useDeleteList } from "@/features/lists/hooks/use-delete-list"
 import { TaskCard } from "@/features/tasks/components/task-card"
 import { AddTaskButton } from "@/features/tasks/components/add-task-button"
-import { ListDropdown } from "@/features/lists/components/list-dropdown"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Dropdown } from "@/components/dropdown"
 
-type List = InferResponseType<typeof client.api.lists[":projectId"]["$get"], 200>["data"][0]
+type Lists = InferResponseType<typeof client.api.lists[":projectId"]["$get"], 200>["data"]
 type Tasks = InferResponseType<typeof client.api.tasks[":projectId"]["$get"], 200>["data"]
 
 type Props = {
-  list: List,
+  lists: Lists,
   tasks: Tasks,
-  setOptimisticTasks: Dispatch<SetStateAction<{
-    id: string;
-    order: number;
-    description: string;
-    listId: string;
-  }[]>>
+  list: Lists[0],
+  setOptimisticLists: Dispatch<SetStateAction<Lists>>,
+  setOptimisticTasks: Dispatch<SetStateAction<Tasks>>
 }
 
-export function ListCard({ list, tasks, setOptimisticTasks }: Props) {
+type FormValues = Omit<z.infer<typeof listToUpdate>, "id">
+
+export function ListCard({
+  lists,
+  tasks,
+  list,
+  setOptimisticLists,
+  setOptimisticTasks
+}: Props) {
 
   const tasksIds = useMemo(() => tasks.map((task) => task.id), [tasks])
+
+  const { editList, isPending: isEditingList } = useEditList(list.id)
+  const { deleteList, isPending: isDeletingList } = useDeleteList(list.id)
+
+  const isPending = isEditingList || isDeletingList
+
+  const [isEditSession, setIsEditSession] = useState(false)
+
+  const form = useForm({
+    resolver: zodResolver(listToUpdate.omit({ id: true })),
+    defaultValues: {
+      name: list.name
+    }
+  })
+
+  const formRef = useRef<ElementRef<"form">>(null)
+
+  function onOpen() {
+    setIsEditSession(true)
+  }
+
+  function onClose() {
+    form.reset()
+    setIsEditSession(false)
+  }
+
+  function onDelete() {
+    deleteList()
+  }
+
+  function onSubmit(data: FormValues) {
+    const oldLists = [...lists]
+    setOptimisticLists((lists) => lists.map((item) => item.id === list.id ? ({ ...list, name: data.name! }) : item))
+    editList({
+      name: data.name
+    }, {
+      onSuccess: () => {
+        setIsEditSession(false)
+      },
+      onError: () => setOptimisticLists(oldLists)
+    })
+  }
+
+  function onInputKeydown(e: any) {
+    if (e.key === " ") {
+      e.stopPropagation()
+    }
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      formRef.current?.requestSubmit()
+    }
+  }
+
+  useOnClickOutside(formRef, onClose)
 
   const { setNodeRef, attributes, listeners, transition, transform, isDragging } = useSortable({
     id: list.id,
@@ -42,7 +111,7 @@ export function ListCard({ list, tasks, setOptimisticTasks }: Props) {
         ref={setNodeRef}
         style={style}
         className="border w-72 min-h-[200px]"
-      ></Card>
+      />
     )
   }
 
@@ -56,12 +125,33 @@ export function ListCard({ list, tasks, setOptimisticTasks }: Props) {
         <CardHeader
           {...listeners}
           {...attributes}
-          className="flex items-center justify-between -my-4 -mx-2"
+          className="-my-4 -mx-2"
         >
-          <CardTitle>
-            <p className="text-sm">{list.name}</p>
-          </CardTitle>
-          <ListDropdown />
+          {isEditSession ? (
+            <Form {...form}>
+              <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)}>
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input disabled={isPending} onPointerDown={(e) => e.stopPropagation()} onKeyDown={onInputKeydown} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
+          ) : (
+            <div className="flex items-center justify-between">
+              <CardTitle>
+                <p className="text-sm">{list.name}</p>
+              </CardTitle>
+              <Dropdown onOpen={onOpen} onDelete={onDelete} isPending={isPending} />
+            </div>
+          )}
         </CardHeader>
         {tasks.length > 0 && (
           <CardContent className="p-2">
