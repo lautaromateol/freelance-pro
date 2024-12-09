@@ -1,7 +1,9 @@
 import { z } from "zod";
 
 export const taskSchema = z.object({
-  description: z.string(),
+  description: z.string().min(1, {
+    message: "Insert a description."
+  }),
   listId: z.string()
 })
 
