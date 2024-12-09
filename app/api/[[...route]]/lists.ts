@@ -68,7 +68,7 @@ const app = new Hono()
     }
   )
   .patch("/:id",
-    zValidator("json", listToUpdate),
+    zValidator("json", listToUpdate.omit({ id: true })),
     zValidator("param", z.object({ id: z.string().optional() })),
     async (c) => {
       const auth = getAuth(c)
@@ -96,7 +96,7 @@ const app = new Hono()
       return c.json({ data }, 200)
     })
   .delete("/:id",
-    zValidator("param", z.object({ id: z.string().optional() })),
+    zValidator("param", z.object({ id: z.string() })),
     async (c) => {
       const auth = getAuth(c)
       const { id } = c.req.valid("param")
