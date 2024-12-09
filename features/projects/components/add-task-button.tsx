@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useForm } from "react-hook-form";
 import { ElementRef, useRef, useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Check, Plus, X } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useOnClickOutside } from "usehooks-ts"
@@ -33,10 +33,12 @@ export function AddTaskButton({ listId }: Props) {
 
   const { createTask, isPending } = useCreateTask()
 
-  useOnClickOutside(formRef, (() => {
+  useOnClickOutside(formRef, onClose)
+  
+  function onClose() {
     form.reset()
     setEditSession(false)
-  }))
+  }
 
   function onInputKeydown(e: any) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -57,30 +59,35 @@ export function AddTaskButton({ listId }: Props) {
   if (isEditSession) {
     return (
       <Form {...form}>
-        <form ref={formRef} onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col space-y-1.5">
+        <form ref={formRef} onSubmit={form.handleSubmit(handleSubmit)} className="flex items-center gap-x-2">
           <FormField
             control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem>
+                <FormMessage />
                 <FormControl>
                   <Input onKeyDown={onInputKeydown} disabled={isPending} {...field} />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
-          <div className="flex items-center">
-            <Button
-              disabled={isPending}
-              size="sm"
-              variant="default"
-              className="mr-2"
-            >
-              Create task
-            </Button>
-            <X onClick={() => setEditSession(false)} className="size-4 cursor-pointer" />
-          </div>
+          <Button
+            disabled={isPending}
+            variant="ghost"
+            type="submit"
+            size="xs"
+          >
+            <Check className="size-4" />
+          </Button>
+          <Button
+            disabled={isPending}
+            variant="ghost"
+            size="xs"
+            onClick={onClose}
+          >
+            <X className="size-4" />
+          </Button>
         </form>
       </Form>
     )

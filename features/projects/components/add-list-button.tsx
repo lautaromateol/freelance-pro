@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ElementRef, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Plus, X } from "lucide-react";
+import { Check, Plus, X } from "lucide-react";
 import { z } from "zod";
 import { useOnClickOutside } from "usehooks-ts";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,6 +38,11 @@ export function AddListButton({ projectId }: Props) {
     setEditSession(false)
   }))
 
+  function onClose() {
+    form.reset()
+    setEditSession(false)
+  }
+
   function onInputKeydown(e: any) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
@@ -57,7 +62,7 @@ export function AddListButton({ projectId }: Props) {
   if (isEditSession) {
     return (
       <Form {...form}>
-        <form ref={formRef} onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col space-y-1.5">
+        <form ref={formRef} onSubmit={form.handleSubmit(handleSubmit)} className="flex items-center gap-x-2">
           <FormField
             control={form.control}
             name="name"
@@ -70,17 +75,22 @@ export function AddListButton({ projectId }: Props) {
               </FormItem>
             )}
           />
-          <div className="flex items-center">
-            <Button
-              disabled={isPending}
-              size="sm"
-              variant="default"
-              className="mr-2"
-            >
-              Create list
-            </Button>
-            <X onClick={() => setEditSession(false)} className="size-4 cursor-pointer" />
-          </div>
+          <Button
+            disabled={isPending}
+            variant="ghost"
+            type="submit"
+            size="xs"
+          >
+            <Check className="size-4" />
+          </Button>
+          <Button
+            disabled={isPending}
+            variant="ghost"
+            size="xs"
+            onClick={onClose}
+          >
+            <X className="size-4" />
+          </Button>
         </form>
       </Form>
     )
