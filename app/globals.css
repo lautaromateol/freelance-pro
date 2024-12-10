@@ -42,6 +42,7 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -82,7 +83,24 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.fc .fc-button {
+  @apply capitalize inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors bg-primary text-primary-foreground
+}
+
+.fc .fc-button:hover {
+  @apply hover:bg-primary/90
+}
+
+.fc .fc-button:focus {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+}
+
+.fc .fc-button:disabled {
+  @apply disabled:pointer-events-none disabled:opacity-50
 }
