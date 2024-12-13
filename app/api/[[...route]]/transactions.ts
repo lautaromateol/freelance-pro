@@ -31,9 +31,9 @@ const app = new Hono()
       const data = await prisma.transaction.findMany({
         where: {
           account: {
-            id: accountId,
             userId: auth?.userId
           },
+          accountId: accountId ? accountId : undefined,
           date: {
             gte: start,
             lte: end
