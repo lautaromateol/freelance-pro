@@ -39,7 +39,7 @@ const app = new Hono()
             account: {
               userId
             },
-            accountId: accountId ? accountId : undefined,
+            accountId: accountId || undefined,
             date: {
               gte: start,
               lte: end
@@ -52,86 +52,87 @@ const app = new Hono()
 
         const incomeAndExpenses = transactions.reduce((acc, { amount }) => {
           if (amount > 0) {
-            return { ...acc, income: acc.income += amount }
+            acc.income += amount
           } else {
-            return { ...acc, expenses: acc.expenses += amount }
+            acc.expenses += amount
           }
+          return acc
         }, { income: 0, expenses: 0 })
 
-        const remaining = incomeAndExpenses.income + incomeAndExpenses.expenses
-
-        return { ...incomeAndExpenses, remaining }
+        return {
+          ...incomeAndExpenses,
+          remaining: incomeAndExpenses.income + incomeAndExpenses.expenses
+        }
       }
 
-      const currentPeriod = await calculatePeriodData(auth.userId, startDate, endDate)
-      const lastPeriod = await calculatePeriodData(auth.userId, lastPeriodStart, lastPeriodEnd)
+      const [currentPeriod, lastPeriod, categories, dbDays] = await Promise.all([
+        calculatePeriodData(auth.userId, startDate, endDate),
+        calculatePeriodData(auth.userId, lastPeriodStart, lastPeriodEnd),
+        prisma.category.findMany({
+          where: {
+            userId: auth.userId,
+            Transaction: {
+              every: {
+                accountId: accountId || undefined,
+              },
+            }
+          },
+          select: {
+            Transaction: {
+              where: {
+                amount: {
+                  lt: 0
+                },
+                date: {
+                  gte: startDate,
+                  lte: endDate
+                }
+              },
+              select: {
+                amount: true
+              }
+            },
+            name: true
+          }
+        }),
+        prisma.transaction.findMany({
+          where: {
+            account: {
+              userId: auth.userId
+            },
+            accountId: accountId || undefined,
+            date: {
+              gte: startDate,
+              lte: endDate
+            }
+          },
+          select: {
+            date: true,
+            amount: true
+          },
+          orderBy: {
+            date: "desc"
+          }
+        })
+      ])
 
       const incomeChange = calculatePercentageChange(currentPeriod.income, lastPeriod.income)
       const expensesChange = calculatePercentageChange(currentPeriod.expenses, lastPeriod.expenses)
       const remainingChange = calculatePercentageChange(currentPeriod.remaining, lastPeriod.remaining)
 
-      const categories = await prisma.category.findMany({
-        where: {
-          userId: auth.userId,
-          Transaction: {
-            every: {
-              accountId: accountId ? accountId : undefined,
-            },
-          }
-        },
-        select: {
-          Transaction: {
-            where: {
-              amount: {
-                lt: 0
-              },
-              date: {
-                gte: startDate,
-                lte: endDate
-              }
-            },
-            select: {
-              amount: true
-            }
-          },
-          name: true
-        }
-      })
-
       const categoriesReduced = categories.map(({ name, Transaction: transactions }) => {
-        return ({
+        return {
           name,
           amount: transactions.reduce((acc, { amount }) => acc + amount, 0) * -1
-        })
+        }
       })
 
       const sortedCategories = categoriesReduced.sort((a, b) => b.amount - a.amount)
 
       const topCategories = sortedCategories.slice(0, 3)
-
       const others = sortedCategories.slice(3).reduce((acc, { amount }) => acc + amount, 0)
 
       const categoriesExpenses = [...topCategories, { name: "Others", amount: others }]
-
-      const dbDays = (await prisma.transaction.findMany({
-        where: {
-          account: {
-            userId: auth.userId
-          },
-          accountId: accountId ? accountId : undefined,
-          date: {
-            gte: startDate,
-            lte: endDate
-          }
-        },
-        select: {
-          date: true,
-          amount: true
-        },
-        orderBy: {
-          date: "desc"
-        }
-      })).map(({ amount, date }) => amount > 0 ? ({ date, income: amount }) : ({ date, expenses: amount }))
 
       type GroupedDays = {
         [key: string]: {
@@ -141,22 +142,24 @@ const app = new Hono()
         }
       }
 
-      const groupedDays = dbDays.reduce<GroupedDays>((acc, { date, expenses, income }) => {
-        const dateString = date.toISOString().split("T")[0]
+      const groupedDays = dbDays
+        .map(({ amount, date }) => amount > 0 ? ({ date, income: amount }) : ({ date, expenses: amount }))
+        .reduce<GroupedDays>((acc, { date, expenses, income }) => {
+          const dateString = date.toISOString().split("T")[0]
 
-        if (acc[dateString]) {
-          acc[dateString].income += income || 0
-          acc[dateString].expenses += expenses || 0
-        } else {
-          acc[dateString] = {
-            date,
-            income: income || 0,
-            expenses: expenses || 0
+          if (acc[dateString]) {
+            acc[dateString].income += income || 0
+            acc[dateString].expenses += expenses || 0
+          } else {
+            acc[dateString] = {
+              date,
+              income: income || 0,
+              expenses: expenses || 0
+            }
           }
-        }
 
-        return acc
-      }, {})
+          return acc
+        }, {})
 
       const days = fillMissingDays(Object.values(groupedDays), startDate, endDate)
 
