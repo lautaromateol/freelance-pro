@@ -155,6 +155,7 @@ export function TransactionForm({ id, defaultValues, onSubmit, onDelete, disable
               <FormControl>
                 <AmountInput onChange={field.onChange} value={field.value} disabled={disabled} />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
