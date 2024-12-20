@@ -14,8 +14,8 @@ export default {
 			colors: {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
-				shade: '#e3fafc',
-				main: '#99e9f2',
+				shade: '#99e9f2',
+				main: '#22b8cf',
 				tint: '#0b7285',
 				card: {
 					DEFAULT: 'hsl(var(--card))',
