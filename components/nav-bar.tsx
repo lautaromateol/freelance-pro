@@ -9,7 +9,7 @@ export function NavBar() {
 
   return (
     <>
-      <header className="sticky top-0 bg-white flex items-center justify-between w-full h-14 px-4 py-6">
+      <header className="sticky top-0 flex items-center justify-between w-full h-14 px-4 py-6">
         <Logo />
         <ul className="md:flex items-center gap-x-4 text-sm font-medium text-main">
           {isLoaded && (
