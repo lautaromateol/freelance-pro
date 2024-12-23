@@ -9,7 +9,7 @@ export default function SignInPage() {
 
   if(isLoaded) {
     return (
-      <div className="flex flex-col items-center rounded-md shadow-md px-2 py-6">
+      <div className="flex flex-col items-center rounded-md shadow-md px-2 py-6 bg-white">
         <Logo />
         <SignIn appearance={{
           elements: {

@@ -9,7 +9,7 @@ export default function SignUpPage() {
 
   if (isLoaded) {
     return (
-      <div className="flex flex-col items-center rounded-md shadow-md px-2 py-6 min-h-56">
+      <div className="flex flex-col items-center rounded-md bg-white shadow-md px-2 py-6 min-h-56">
         <Logo />
         <SignUp appearance={{
           elements: {
