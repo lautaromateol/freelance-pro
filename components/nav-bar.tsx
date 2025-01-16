@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { useUser } from "@clerk/nextjs";
+import { Button } from "./ui/button";
 
 export function NavBar() {
 
@@ -14,9 +15,9 @@ export function NavBar() {
         <ul className="md:flex items-center gap-x-4 text-sm font-medium text-main">
           {isLoaded && (
             <Link href={`${isSignedIn ? "/dashboard" : "/sign-in"}`}>
-              <li className="px-2 py-1 rounded-md bg-gradient-to-r from-main to-tint text-white hover:bg-tint">
+              <Button size="sm" className="bg-gradient-to-b from-cyan-600 to-cyan-700 hover:from-cyan-600 hover:to-cyan-700 text-white hover:bg-tint">
                 {isSignedIn ? "Dashboard" : "Sign in"}
-              </li>
+              </Button>
             </Link>
           )}
         </ul>
