@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { format, subDays } from "date-fns"
+import { parse, subDays } from "date-fns"
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import { zValidator } from "@hono/zod-validator";
 import { prisma } from "@/lib/prisma";
@@ -25,8 +25,10 @@ const app = new Hono()
       const defaultTo = new Date()
       const defaultFrom = subDays(defaultTo, 30)
 
-      const start = from ? format(from, "yyyy-MM-dddd") : defaultFrom
-      const end = to ? format(to, "yyyy-MM-dddd") : defaultTo
+      const start = from
+        ? parse(from, "yyyy-MM-dd", new Date())
+        : defaultFrom;
+      const end = to ? parse(to, "yyyy-MM-dd", new Date()) : defaultTo;
 
       const data = await prisma.transaction.findMany({
         where: {
