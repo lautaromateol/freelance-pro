@@ -63,7 +63,7 @@ export function PieVariant({ data }: Props) {
                       <span style={{ backgroundColor: color }} className="rounded-full size-2" />
                       <div className="flex items-center gap-x-1">
                         <p className="text-muted-foreground text-sm">{name}</p>
-                        <span className="text-sm">{formatPercentage(percent * 100,  { addPrefix: false })}</span>
+                        <span className="text-sm">{percent ? formatPercentage(percent * 100,  { addPrefix: false }) : "0%"}</span>
                       </div>
                     </li>
                   )

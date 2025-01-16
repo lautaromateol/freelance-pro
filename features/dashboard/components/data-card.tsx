@@ -70,7 +70,7 @@ export function DataCard({ title, amount, percentageChange, dateRange, icon: Ico
             formattingFn={convertToCurrency}
           />
         </p>
-        {percentageChange && (
+        {percentageChange ? (
           <p className={cn(
             "texts-sm",
             percentageChange > 0 ? "text-emerald-500" :
@@ -79,7 +79,7 @@ export function DataCard({ title, amount, percentageChange, dateRange, icon: Ico
           )}>
             {formatPercentage(percentageChange, { addPrefix: percentageChange > 0 })} from last period.
           </p>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   )
