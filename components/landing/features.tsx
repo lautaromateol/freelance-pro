@@ -3,11 +3,11 @@ import { FeatureCard } from "./feature-card";
 
 export function Features() {
   return (
-    <div className="flex justify-start w-[1280px] mx-auto pt-8 pb-6">
+    <div className="flex justify-start w-full lg:w-[1280px] mx-auto px-4 lg:px-0 pt-8 pb-6">
       <div className="w-full flex flex-col gap-y-4">
         <div className="space-y-0.5">
           <p className="text-sm font-semibold uppercase text-cyan-600">Features</p>
-          <h2 className="text-cyan-900 text-3xl font-bold antialised"> Manage your expenses, projects, track relevant information and more <i><u>effortlesly</u></i></h2>
+          <h2 className="text-cyan-900 text-xl md:text-3xl font-bold antialised"> Manage your expenses, projects, track relevant information and more <i><u>effortlesly</u></i></h2>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
           <FeatureCard

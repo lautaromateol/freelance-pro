@@ -17,10 +17,10 @@ export function FeatureCard({ title, icon, description }: FeatureCardProps) {
         <div className="grid place-content-center rounded-full size-12 p-4 bg-cyan-100">
           <Icon className="size-6 text-cyan-500" />
         </div>
-        <p className="text-xl font-semibold antialised text-cyan-700">{title}</p>
+        <p className="text-base md:text-xl font-semibold antialised text-cyan-700">{title}</p>
       </div>
       <Separator className="w-full text-cyan-400" />
-      <p className="text-base font-medium antialised">{description}</p>
+      <p className="text-sm md:text-base font-medium antialised">{description}</p>
     </div>
   )
 }
